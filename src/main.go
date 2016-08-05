@@ -108,7 +108,10 @@ func build(root_url string, key string, machines *Machines) {
 }
 
 func get_machines(etcd_url string) Machines {
-	dir := "/_coreos.com/fleet/machines"
+	dir := os.Getenv("FLEET_DIR")
+	if dir == "" {
+		dir = "/_coreos.com/fleet/machines"
+	}
 
 	var machines Machines
 	build(etcd_url, dir, &machines)
@@ -135,9 +138,9 @@ func get_method(w http.ResponseWriter, path string) {
 	rkt_url := "/containers"
 	unit_url := "/units"
 	machines_url := "/machines"
-	fleet_url := os.Getenv("ETCD_URL")
-	if fleet_url == "" {
-		fleet_url = "http://127.0.0.1:2379/v2/keys"
+	etcd_url := os.Getenv("ETCD_URL")
+	if etcd_url == "" {
+		etcd_url = "http://127.0.0.1:2379/v2/keys"
 	}
 
 	if (path == root_url) {
@@ -149,7 +152,7 @@ func get_method(w http.ResponseWriter, path string) {
 		log.Printf("GET %s\n", unit_url)
 	} else if (path == machines_url) {
 		log.Printf("GET %s\n", machines_url)
-		m := get_machines(fleet_url)
+		m := get_machines(etcd_url)
 		send_machines(w, m)
 
 	} else {
