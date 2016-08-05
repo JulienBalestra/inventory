@@ -85,7 +85,7 @@ func fetch(url string) []byte {
 	return b
 }
 
-func build(root_url string, key string, machines *Machines) {
+func build_machines(root_url string, key string, machines *Machines) {
 	content := fetch(root_url + key)
 
 	var reply EtcdReply
@@ -97,7 +97,7 @@ func build(root_url string, key string, machines *Machines) {
 	for _, node := range reply.Node.Nodes {
 		if node.Dir == true {
 			log.Printf("dir == %s\n", node.Key)
-			build(root_url, node.Key, machines)
+			build_machines(root_url, node.Key, machines)
 		} else {
 			log.Printf("value == %s\n", node.Value)
 			var m Machine
@@ -114,7 +114,7 @@ func get_machines(etcd_url string) Machines {
 	}
 
 	var machines Machines
-	build(etcd_url, dir, &machines)
+	build_machines(etcd_url, dir, &machines)
 	for _, m := range machines.Machines {
 		log.Printf("%s %s", m.ID, m.PublicIP)
 	}
