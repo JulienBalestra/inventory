@@ -3,16 +3,21 @@ package main
 import (
 	"net/http"
 	"log"
+	"encoding/json"
 )
 
+var CONF = create_config()
+
 func not_found(w http.ResponseWriter, path string) {
-	resp := []byte("404 not found\n")
 
 	w.WriteHeader(404)
-	r, err := w.Write(resp)
+	b, j_error := json.Marshal(CONF.Urls)
+	if j_error != nil {
+		log.Println(j_error)
+	}
+	r, err := w.Write(b)
 	if err != nil {
-		log.Printf("error: %v\n", err)
-		panic(err)
+		log.Println(err)
 	}
 
 	log.Printf("%d GET %s: 404\n", r, path)
@@ -24,39 +29,28 @@ type Root struct {
 }
 
 func get_method(w http.ResponseWriter, path string) {
-	root_url := "/"
-	containers_url := "/containers"
-	unit_url := "/units"
-	machines_url := "/machines"
-	interfaces := "/interfaces"
+	switch  {
+	case path == CONF.Urls.Root || path == CONF.Urls.Root + "/":
+		log.Printf("GET %s\n", path)
 
-	if (path == root_url) {
 		var root_data Root
-		log.Printf("GET %s\n", root_url)
-		//get_containers(w, true)
+
 		root_data.Machines = get_machines()
 		root_data.Interfaces = get_interfaces(root_data.Machines)
 		marshal_send(w, root_data)
+	case path == CONF.Urls.Interfaces || path == CONF.Urls.Interfaces + "/":
+		log.Printf("GET %s\n", path)
 
-	} else if (path == containers_url) {
-		log.Printf("GET %s\n", containers_url)
-		//get_containers(w, false)
-
-	} else if (path == unit_url) {
-		log.Printf("GET %s\n", unit_url)
-
-	} else if (path == interfaces) {
-		log.Printf("GET %s\n", interfaces)
 		marshal_send(w, get_interfaces(nil))
 
-	} else if (path == machines_url) {
-		log.Printf("GET %s\n", machines_url)
-		m := get_machines()
-		marshal_send(w, m)
+	case path == CONF.Urls.Machines || path == CONF.Urls.Machines + "/":
+		log.Printf("GET %s\n", path)
 
-	} else {
+		marshal_send(w, get_machines())
+	default:
 		not_found(w, path)
 	}
+
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
@@ -65,9 +59,9 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-var PORT = "8080"
-
 func main() {
+	b, _ := json.Marshal(CONF)
+	log.Printf("%s", string(b))
 	http.HandleFunc("/", handler)
-	http.ListenAndServe("0.0.0.0:" + PORT, nil)
+	http.ListenAndServe(CONF.Bind + ":" + CONF.Port, nil)
 }

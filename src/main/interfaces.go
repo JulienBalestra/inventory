@@ -5,7 +5,6 @@ import (
 	"log"
 	"strings"
 	"strconv"
-	//"net/http"
 	"encoding/json"
 )
 
@@ -48,10 +47,11 @@ func remote_interfaces(machines []Machine, interfaces *[]Iface) {
 
 	for _, m := range machines {
 
-		content = fetch("http://" + m.PublicIP + ":" + PORT + "/networks")
+		content = fetch(create_request(m.PublicIP, CONF.Urls.Interfaces))
 
 		if content == nil {
-			log.Printf("remote_interfaces with empty content: http://%s:%s/networks", m.PublicIP, PORT)
+			log.Printf("remote_interfaces with empty content: %s",
+				create_request(m.PublicIP, CONF.Urls.Interfaces))
 			continue
 		}
 		ret := json.Unmarshal(content, &remote_host)

@@ -5,10 +5,9 @@ PACKAGE=main
 CC=go
 
 SRCS = \
-containers.go \
 machines.go \
 main.go \
-networks.go \
+interfaces.go \
 requests.go
 
 default: $(TARGET)
