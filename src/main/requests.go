@@ -23,16 +23,20 @@ type EtcdNode struct {
 }
 
 func fetch(url string) []byte {
+	var b []byte
+
 	log.Printf("GET %s ...\n", url)
 	r, err := http.Get(url)
 	if err != nil {
 		log.Println(err)
+		return b
 	}
 	b, err_read := ioutil.ReadAll(r.Body)
 	r.Body.Close()
+	//r.StatusCode
 	if err_read != nil {
 		log.Println(err_read)
-		return nil
+		return b
 	}
 	return b
 }

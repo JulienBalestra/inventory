@@ -26,9 +26,10 @@ func get_method(w http.ResponseWriter, path string) {
 
 	if (path == root_url) {
 		log.Printf("GET %s\n", root_url)
+		get_containers(w, true)
 	} else if (path == rkt_url) {
 		log.Printf("GET %s\n", rkt_url)
-		get_containers(w)
+		get_containers(w, false)
 	} else if (path == unit_url) {
 		log.Printf("GET %s\n", unit_url)
 	} else if (path == machines_url) {
