@@ -15,7 +15,7 @@ type Rkt struct {
 	HostID string
 }
 
-func retrive_local() Rkt {
+func retrieve_local() Rkt {
 	one := Rkt{Name: "One", Aci: "one.aci", Pid: 10, Ip: "1.1.1.1"}
 
 	return one
@@ -57,7 +57,7 @@ func get_containers(w http.ResponseWriter, remote bool) {
 	if remote {
 		remote_containers(&containers)
 	} else {
-		containers = append(containers, retrive_local())
+		containers = append(containers, retrieve_local())
 	}
 
 	b, err_j := json.Marshal(containers)
