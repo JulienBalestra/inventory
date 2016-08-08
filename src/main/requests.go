@@ -23,7 +23,7 @@ type EtcdNode struct {
 	Dir           bool
 }
 
-func fetch(url string) []byte {
+func Fetch(url string) []byte {
 	var b []byte
 
 	log.Printf("GET %s ...\n", url)
@@ -42,7 +42,7 @@ func fetch(url string) []byte {
 	return b
 }
 
-func marshal_send(w http.ResponseWriter, i interface{}) {
+func MarshalAndSend(w http.ResponseWriter, i interface{}) {
 	b, err_marshal := json.Marshal(i)
 	if err_marshal != nil {
 		log.Println(err_marshal)

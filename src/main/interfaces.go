@@ -17,7 +17,7 @@ type Iface struct {
 	HostID  string
 }
 
-func local_interfaces() []Iface {
+func LocalIfaces() []Iface {
 	var ifaces []Iface
 	var iface Iface
 
@@ -41,13 +41,13 @@ func local_interfaces() []Iface {
 	return ifaces
 }
 
-func remote_interfaces(machines []Machine, interfaces *[]Iface) {
+func RemoteIfaces(machines []Machine, interfaces *[]Iface) {
 	var content []byte
 	var remote_host []Iface
 
 	for _, m := range machines {
 
-		content = fetch(CreateRequest(m.PublicIP, CONF.Urls.Interfaces))
+		content = Fetch(CreateRequest(m.PublicIP, CONF.Urls.Interfaces))
 
 		if content == nil {
 			log.Printf("remote_interfaces with empty content: %s",
@@ -67,13 +67,13 @@ func remote_interfaces(machines []Machine, interfaces *[]Iface) {
 	}
 }
 
-func get_interfaces(machines []Machine) []Iface {
+func GetInterfaces(machines []Machine) []Iface {
 	var ifaces []Iface
 
 	if machines != nil {
-		remote_interfaces(machines, &ifaces)
+		RemoteIfaces(machines, &ifaces)
 	} else {
-		ifaces = local_interfaces()
+		ifaces = LocalIfaces()
 	}
 
 	return ifaces

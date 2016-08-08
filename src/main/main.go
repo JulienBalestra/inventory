@@ -8,7 +8,7 @@ import (
 
 var CONF = CreateConfig()
 
-func not_found(w http.ResponseWriter, path string) {
+func NotFound(w http.ResponseWriter, path string) {
 
 	w.WriteHeader(404)
 	b, j_error := json.Marshal(CONF.Urls)
@@ -28,41 +28,41 @@ type Root struct {
 	Machines   []Machine
 }
 
-func get_method(w http.ResponseWriter, path string) {
+func GetMethod(w http.ResponseWriter, path string) {
 	switch  {
 	case path == CONF.Urls.Root || path == CONF.Urls.Root + "/":
 		log.Printf("GET %s\n", path)
 
 		var root_data Root
 
-		root_data.Machines = get_machines()
-		root_data.Interfaces = get_interfaces(root_data.Machines)
-		marshal_send(w, root_data)
+		root_data.Machines = GetMachines()
+		root_data.Interfaces = GetInterfaces(root_data.Machines)
+		MarshalAndSend(w, root_data)
 	case path == CONF.Urls.Interfaces || path == CONF.Urls.Interfaces + "/":
 		log.Printf("GET %s\n", path)
 
-		marshal_send(w, get_interfaces(nil))
+		MarshalAndSend(w, GetInterfaces(nil))
 
 	case path == CONF.Urls.Machines || path == CONF.Urls.Machines + "/":
 		log.Printf("GET %s\n", path)
 
-		marshal_send(w, get_machines())
+		MarshalAndSend(w, GetMachines())
 
 	default:
-		not_found(w, path)
+		NotFound(w, path)
 	}
 
 }
 
-func handler(w http.ResponseWriter, r *http.Request) {
+func Handler(w http.ResponseWriter, r *http.Request) {
 	if (r.Method == "GET") {
-		get_method(w, r.URL.Path)
+		GetMethod(w, r.URL.Path)
 	}
 }
 
 func main() {
 	b, _ := json.Marshal(CONF)
 	log.Printf("%s", string(b))
-	http.HandleFunc("/", handler)
+	http.HandleFunc("/", Handler)
 	http.ListenAndServe(CONF.Bind + ":" + CONF.Port, nil)
 }

@@ -13,10 +13,10 @@ type Machine struct {
 	Version  string
 }
 
-func browse_nodes(node EtcdNode, machines *[]Machine) {
+func BrowseNodes(node EtcdNode, machines *[]Machine) {
 	for _, node := range node.Nodes {
 		if node.Dir == true {
-			browse_nodes(node, machines)
+			BrowseNodes(node, machines)
 		} else {
 			log.Printf("browse_nodes: %s\n", node.Value)
 			var one_machine Machine
@@ -30,8 +30,8 @@ func browse_nodes(node EtcdNode, machines *[]Machine) {
 	}
 }
 
-func build_machines(root_url string, key string, machines *[]Machine) {
-	content := fetch(root_url + key + "/?recursive=true")
+func BuildMachines(root_url string, key string, machines *[]Machine) {
+	content := Fetch(root_url + key + "/?recursive=true")
 
 	var reply EtcdReply
 	ret := json.Unmarshal(content, &reply)
@@ -39,10 +39,10 @@ func build_machines(root_url string, key string, machines *[]Machine) {
 		log.Println(ret)
 		return
 	}
-	browse_nodes(reply.Node, machines)
+	BrowseNodes(reply.Node, machines)
 }
 
-func get_machines() []Machine {
+func GetMachines() []Machine {
 	etcd_url := os.Getenv("ETCD_URL")
 	if etcd_url == "" {
 		etcd_url = "http://127.0.0.1:2379/v2/keys"
@@ -54,6 +54,6 @@ func get_machines() []Machine {
 	}
 
 	var machines []Machine
-	build_machines(etcd_url, dir, &machines)
+	BuildMachines(etcd_url, dir, &machines)
 	return machines
 }
