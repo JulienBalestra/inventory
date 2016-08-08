@@ -6,18 +6,19 @@ type Config struct {
 	Urls     Urls
 	Port     string
 	Protocol string
-	Bind	 string
+	Bind     string
 }
 
 type Urls struct {
 	Version    string
 	Api        string
 	Root       string
+
 	Machines   string
 	Interfaces string
 }
 
-func create_config() Config {
+func CreateConfig() Config {
 	var c Config
 
 	c.Port = "8080"
@@ -25,7 +26,6 @@ func create_config() Config {
 
 	valid_ip := net.ParseIP("0.0.0.0")
 	c.Bind = valid_ip.String()
-
 
 	c.Urls.Api = "/api"
 	c.Urls.Version = "/v0"
@@ -41,7 +41,7 @@ func create_config() Config {
 	return c
 }
 
-func create_request(target string, url string) string {
+func CreateRequest(target string, url string) string {
 
 	// http://1.1.1.1:8080/api/v0/machines
 	return CONF.Protocol + target + ":" + CONF.Port + url

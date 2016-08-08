@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 )
 
-var CONF = create_config()
+var CONF = CreateConfig()
 
 func not_found(w http.ResponseWriter, path string) {
 
@@ -47,6 +47,7 @@ func get_method(w http.ResponseWriter, path string) {
 		log.Printf("GET %s\n", path)
 
 		marshal_send(w, get_machines())
+
 	default:
 		not_found(w, path)
 	}

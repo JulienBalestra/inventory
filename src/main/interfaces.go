@@ -47,11 +47,11 @@ func remote_interfaces(machines []Machine, interfaces *[]Iface) {
 
 	for _, m := range machines {
 
-		content = fetch(create_request(m.PublicIP, CONF.Urls.Interfaces))
+		content = fetch(CreateRequest(m.PublicIP, CONF.Urls.Interfaces))
 
 		if content == nil {
 			log.Printf("remote_interfaces with empty content: %s",
-				create_request(m.PublicIP, CONF.Urls.Interfaces))
+				CreateRequest(m.PublicIP, CONF.Urls.Interfaces))
 			continue
 		}
 		ret := json.Unmarshal(content, &remote_host)
