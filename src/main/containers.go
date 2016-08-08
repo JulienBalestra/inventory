@@ -30,7 +30,7 @@ func remote_containers(containers *[]Rkt) {
 	http.DefaultClient.Timeout = 2
 	for _, m := range machines {
 
-		content = fetch("http://" + m.PublicIP + ":8080/containers")
+		content = fetch("http://" + m.PublicIP + ":" + PORT + "/containers")
 
 		if content == nil {
 			log.Printf("remote_containers empty content: http://%s:8080/containers", m.PublicIP)

@@ -4,6 +4,7 @@ import (
 	"log"
 	"io/ioutil"
 	"net/http"
+	"encoding/json"
 )
 
 type EtcdReply struct {
@@ -39,4 +40,16 @@ func fetch(url string) []byte {
 		return b
 	}
 	return b
+}
+
+func marshal_send(w http.ResponseWriter, i interface{}) {
+	b, err_marshal := json.Marshal(i)
+	if err_marshal != nil {
+		log.Println(err_marshal)
+		return
+	}
+	_, err := w.Write(b)
+	if err != nil {
+		log.Println(err)
+	}
 }

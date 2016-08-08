@@ -3,7 +3,6 @@ package main
 import (
 	"log"
 	"encoding/json"
-	"net/http"
 	"os"
 )
 
@@ -57,16 +56,4 @@ func get_machines() []Machine {
 	var machines []Machine
 	build_machines(etcd_url, dir, &machines)
 	return machines
-}
-
-func send_machines(w http.ResponseWriter, m []Machine) {
-	b, err_marshal := json.Marshal(m)
-	if err_marshal != nil {
-		log.Println(err_marshal)
-		return
-	}
-	_, err := w.Write(b)
-	if err != nil {
-		log.Println(err)
-	}
 }
