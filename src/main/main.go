@@ -23,20 +23,20 @@ func NotFound(w http.ResponseWriter, path string) {
 	log.Printf("%d GET %s: 404\n", r, path)
 }
 
-type Root struct {
+type RootData struct {
 	Interfaces []Iface
 	Machines   []Machine
 }
 
 func GetMethod(w http.ResponseWriter, path string) {
-	var root_data Root
+	var root_data RootData
 
 	switch  {
 	case path == CONF.Urls.Root || path == CONF.Urls.Root + "/":
 		log.Printf("%s GET %s\n", FuncNameF(GetMethod), path)
 
 		root_data.Machines = GetMachines(true)
-		//root_data.Interfaces = GetInterfaces(root_data.Machines)
+		root_data.Interfaces = GetInterfaces(root_data.Machines)
 		MarshalAndSend(w, root_data)
 
 	case path == CONF.Urls.Interfaces || path == CONF.Urls.Interfaces + "/":
