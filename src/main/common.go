@@ -7,13 +7,13 @@ import (
 )
 
 type Config struct {
-	Urls     Urls
-	Port     string
-	Protocol string
-	Bind     string
+	Urls        Urls
+	Port        string
+	Protocol    string
+	Bind        string
 
 	EtcdAddress string
-	FleetUrl string
+	FleetUrl    string
 }
 
 type Urls struct {
@@ -30,10 +30,15 @@ func CreateConfig() Config {
 
 	c.Port = "8080"
 	c.Protocol = "http://"
-
 	valid_ip := net.ParseIP("0.0.0.0")
 	c.Bind = valid_ip.String()
 
+	// Common use of Etcd and Fleet
+	c.EtcdAddress = "http://127.0.0.1:2379/v2/keys"
+	c.FleetUrl = "/_coreos.com/fleet/machines"
+
+
+	// Internal Application //
 	c.Urls.Api = "/api"
 	c.Urls.Version = "/v0"
 
@@ -45,10 +50,6 @@ func CreateConfig() Config {
 
 	// /api/v0/interfaces
 	c.Urls.Interfaces = c.Urls.Root + "/interfaces"
-
-	// Official Fleet
-	c.EtcdAddress = "http://127.0.0.1:2379/v2/keys"
-	c.FleetUrl = "/_coreos.com/fleet/machines"
 
 	return c
 }
