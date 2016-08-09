@@ -24,27 +24,22 @@ func SetHostname(one_machine *Machine) {
 	}
 }
 
-func BrowseNodes(node EtcdNode, machines *[]Machine, full bool) {
+func ConstructMachine(ch chan <- Machine, node EtcdNode, full bool) {
+	log.Printf("%s %s", FuncNameF(ConstructMachine), node.Value)
 
-	for _, node := range node.Nodes {
-		if node.Dir == true {
-			BrowseNodes(node, machines, full)
-
-		} else {
-			log.Printf("%s %s", FuncNameF(BrowseNodes), node.Value)
-
-			var one_machine Machine
-			ret := json.Unmarshal([]byte(node.Value), &one_machine)
-			if ret != nil {
-				log.Println(ret)
-				continue
-			}
-			if full == true {
-				SetHostname(&one_machine)
-				RemoteAddIfaces(one_machine.PublicIP, &one_machine.Interfaces)
-			}
-			*machines = append(*machines, one_machine)
+	var one_machine Machine
+	for _, n := range node.Nodes {
+		log.Printf("%s %s", FuncNameF(ConstructMachine), n.Value)
+		ret := json.Unmarshal([]byte(n.Value), &one_machine)
+		if ret != nil {
+			log.Println(ret)
+			return
 		}
+		if full == true {
+			SetHostname(&one_machine)
+			RemoteIfaces(one_machine.PublicIP, &one_machine.Interfaces)
+		}
+		ch <- one_machine
 	}
 }
 
@@ -58,7 +53,22 @@ func GetMachines(full bool) []Machine {
 		log.Println(ret)
 		return machines
 	}
-	BrowseNodes(reply.Node, &machines, full)
+
+	nb_nodes := len(reply.Node.Nodes)
+	log.Printf("%s %d machines", FuncNameF(GetMachines), nb_nodes)
+	if nb_nodes > 0 {
+		ch := make(chan Machine)
+		for i, node := range reply.Node.Nodes {
+			log.Printf("%s starting %d/%d", FuncNameF(GetMachines), i + 1, nb_nodes)
+			go ConstructMachine(ch, node, full)
+		}
+		for i := range reply.Node.Nodes {
+			log.Printf("%s waiting %d/%d", FuncNameF(GetMachines), i + 1, nb_nodes)
+			machines = append(machines, <-ch)
+			log.Printf("%s finished %d/%d", FuncNameF(GetMachines), i + 1, nb_nodes)
+		}
+	}
+	log.Printf("%s return [%d]Machine for %d expected", FuncNameF(GetMachines), len(machines), nb_nodes)
 
 	return machines
 }

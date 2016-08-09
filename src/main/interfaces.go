@@ -39,14 +39,14 @@ func LocalIfaces() []Iface {
 	return ifaces
 }
 
-func RemoteAddIfaces(ip string, interfaces *[]Iface) {
+func RemoteIfaces(ip string, interfaces *[]Iface) {
 	var content []byte
 
-	log.Printf("%s %s ...", FuncNameF(RemoteAddIfaces), ip)
+	log.Printf("%s %s ...", FuncNameF(RemoteIfaces), ip)
 	content = Fetch(InternalRequest(ip, CONF.Urls.Interfaces))
 
 	if content == nil {
-		log.Printf("%s with empty content: %s", FuncNameF(RemoteAddIfaces),
+		log.Printf("%s with empty content: %s", FuncNameF(RemoteIfaces),
 			InternalRequest(ip, CONF.Urls.Interfaces))
 		return
 	}
@@ -55,18 +55,5 @@ func RemoteAddIfaces(ip string, interfaces *[]Iface) {
 		log.Println(ret)
 		return
 	}
-	log.Printf("%s %s with %d ifaces", FuncNameF(RemoteAddIfaces), ip, len(*interfaces))
-}
-
-func GetInterfaces(machines []Machine) []Iface {
-	var ifaces []Iface
-
-	log.Printf("%s machine number: %d", FuncNameF(GetInterfaces), len(machines))
-	if machines != nil {
-		for _, m := range machines {
-			RemoteAddIfaces(m.PublicIP, &ifaces)
-		}
-
-	}
-	return ifaces
+	log.Printf("%s %s with %d ifaces", FuncNameF(RemoteIfaces), ip, len(*interfaces))
 }
