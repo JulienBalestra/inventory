@@ -3,7 +3,6 @@ package main
 import (
 	"log"
 	"encoding/json"
-	"os"
 )
 
 type Machine struct {
@@ -14,46 +13,39 @@ type Machine struct {
 }
 
 func BrowseNodes(node EtcdNode, machines *[]Machine) {
+
 	for _, node := range node.Nodes {
 		if node.Dir == true {
 			BrowseNodes(node, machines)
+
 		} else {
-			log.Printf("browse_nodes: %s\n", node.Value)
+			log.Printf("%s: %s", FuncName(BrowseNodes), node.Value)
+
 			var one_machine Machine
 			ret := json.Unmarshal([]byte(node.Value), &one_machine)
 			if ret != nil {
 				log.Println(ret)
-				return
+				continue
+			} else {
+				*machines = append(*machines, one_machine)
 			}
-			*machines = append(*machines, one_machine)
 		}
 	}
 }
 
-func BuildMachines(root_url string, key string, machines *[]Machine) {
-	content := Fetch(root_url + key + "/?recursive=true")
-
+func GetMachines() []Machine {
+	var machines []Machine
 	var reply EtcdReply
+
+	content := Fetch(CONF.EtcdAddress + CONF.FleetUrl + "/?recursive=true")
+
 	ret := json.Unmarshal(content, &reply)
 	if ret != nil {
 		log.Println(ret)
-		return
+		return machines
 	}
-	BrowseNodes(reply.Node, machines)
-}
+	BrowseNodes(reply.Node, &machines)
 
-func GetMachines() []Machine {
-	etcd_url := os.Getenv("ETCD_URL")
-	if etcd_url == "" {
-		etcd_url = "http://127.0.0.1:2379/v2/keys"
-	}
-	dir := os.Getenv("FLEET_DIR")
-
-	if dir == "" {
-		dir = "/_coreos.com/fleet/machines"
-	}
-
-	var machines []Machine
-	BuildMachines(etcd_url, dir, &machines)
+	//RequestMachines(etcd_url, dir, &machines)
 	return machines
 }

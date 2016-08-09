@@ -1,12 +1,19 @@
 package main
 
-import "net"
+import (
+	"net"
+	"runtime"
+	"reflect"
+)
 
 type Config struct {
 	Urls     Urls
 	Port     string
 	Protocol string
 	Bind     string
+
+	EtcdAddress string
+	FleetUrl string
 }
 
 type Urls struct {
@@ -38,11 +45,20 @@ func CreateConfig() Config {
 
 	// /api/v0/interfaces
 	c.Urls.Interfaces = c.Urls.Root + "/interfaces"
+
+	// Official Fleet
+	c.EtcdAddress = "http://127.0.0.1:2379/v2/keys"
+	c.FleetUrl = "/_coreos.com/fleet/machines"
+
 	return c
 }
 
-func CreateRequest(target string, url string) string {
+func InternalRequest(target string, url string) string {
 
 	// http://1.1.1.1:8080/api/v0/machines
 	return CONF.Protocol + target + ":" + CONF.Port + url
+}
+
+func FuncName(i interface{}) string {
+	return runtime.FuncForPC(reflect.ValueOf(i).Pointer()).Name()
 }
