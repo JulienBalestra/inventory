@@ -35,41 +35,38 @@ func LocalIfaces() []Iface {
 			ifaces = append(ifaces, iface)
 		}
 	}
+	log.Printf("%s with %d ifaces", FuncName(LocalIfaces), len(ifaces))
 	return ifaces
 }
 
 func RemoteAddIfaces(ip string, interfaces *[]Iface) {
 	var content []byte
-	var remote_host []Iface
 
+	log.Printf("%s %s ...", FuncNameF(RemoteAddIfaces), ip)
 	content = Fetch(InternalRequest(ip, CONF.Urls.Interfaces))
 
 	if content == nil {
-		log.Printf("remote_interfaces with empty content: %s",
+		log.Printf("%s with empty content: %s", FuncNameF(RemoteAddIfaces),
 			InternalRequest(ip, CONF.Urls.Interfaces))
 		return
 	}
-	ret := json.Unmarshal(content, &remote_host)
+	ret := json.Unmarshal(content, interfaces)
 	if ret != nil {
 		log.Println(ret)
 		return
 	}
-	for _, i := range remote_host {
-		*interfaces = append(*interfaces, i)
-	}
+	log.Printf("%s %s with %d ifaces", FuncNameF(RemoteAddIfaces), ip, len(*interfaces))
 }
 
 func GetInterfaces(machines []Machine) []Iface {
 	var ifaces []Iface
 
+	log.Printf("%s machine number: %d", FuncNameF(GetInterfaces), len(machines))
 	if machines != nil {
 		for _, m := range machines {
 			RemoteAddIfaces(m.PublicIP, &ifaces)
 		}
 
-	} else {
-		ifaces = LocalIfaces()
 	}
-
 	return ifaces
 }

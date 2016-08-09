@@ -29,22 +29,23 @@ type Root struct {
 }
 
 func GetMethod(w http.ResponseWriter, path string) {
+	var root_data Root
+
 	switch  {
 	case path == CONF.Urls.Root || path == CONF.Urls.Root + "/":
-		log.Printf("GET %s\n", path)
-
-		var root_data Root
+		log.Printf("%s GET %s\n", FuncNameF(GetMethod), path)
 
 		root_data.Machines = GetMachines(true)
-		root_data.Interfaces = GetInterfaces(root_data.Machines)
+		//root_data.Interfaces = GetInterfaces(root_data.Machines)
 		MarshalAndSend(w, root_data)
-	case path == CONF.Urls.Interfaces || path == CONF.Urls.Interfaces + "/":
-		log.Printf("GET %s\n", path)
 
-		MarshalAndSend(w, GetInterfaces(nil))
+	case path == CONF.Urls.Interfaces || path == CONF.Urls.Interfaces + "/":
+		log.Printf("%s GET %s\n", FuncNameF(GetMethod), path)
+
+		MarshalAndSend(w, LocalIfaces())
 
 	case path == CONF.Urls.Machines || path == CONF.Urls.Machines + "/":
-		log.Printf("GET %s\n", path)
+		log.Printf("%s GET %s\n", FuncNameF(GetMethod), path)
 
 		MarshalAndSend(w, GetMachines(false))
 

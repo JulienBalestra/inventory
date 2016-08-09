@@ -14,6 +14,8 @@ type Config struct {
 
 	EtcdAddress string
 	FleetUrl    string
+
+	LogPadding  int
 }
 
 type Urls struct {
@@ -36,6 +38,8 @@ func CreateConfig() Config {
 	// Common use of Etcd and Fleet
 	c.EtcdAddress = "http://127.0.0.1:2379/v2/keys"
 	c.FleetUrl = "/_coreos.com/fleet/machines"
+
+	c.LogPadding = 20
 
 
 	// Internal Application //
@@ -61,5 +65,13 @@ func InternalRequest(target string, url string) string {
 }
 
 func FuncName(i interface{}) string {
-	return runtime.FuncForPC(reflect.ValueOf(i).Pointer()).Name()
+	return runtime.FuncForPC(reflect.ValueOf(i).Pointer()).Name() + "\t"
+}
+
+func FuncNameF(i interface{}) string {
+	name := FuncName(i)
+	for i := len(name); i < CONF.LogPadding; i++ {
+		name = name + " "
+	}
+	return name
 }

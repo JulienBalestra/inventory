@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"encoding/json"
+	"os"
 )
 
 type Machine struct {
@@ -10,17 +11,17 @@ type Machine struct {
 	PublicIP   string
 	Metadata   interface{}
 	Version    string
+	Hostname   string
 
 	Interfaces []Iface
 }
 
-type FullMachine struct {
-	ID         string
-	PublicIP   string
-	Metadata   interface{}
-	Version    string
-
-	Interfaces []Iface
+func SetHostname(one_machine *Machine) {
+	var err error
+	one_machine.Hostname, err = os.Hostname()
+	if err != nil {
+		log.Println(err)
+	}
 }
 
 func BrowseNodes(node EtcdNode, machines *[]Machine, full bool) {
@@ -30,19 +31,19 @@ func BrowseNodes(node EtcdNode, machines *[]Machine, full bool) {
 			BrowseNodes(node, machines, full)
 
 		} else {
-			log.Printf("%s: %s", FuncName(BrowseNodes), node.Value)
+			log.Printf("%s %s", FuncNameF(BrowseNodes), node.Value)
 
 			var one_machine Machine
 			ret := json.Unmarshal([]byte(node.Value), &one_machine)
 			if ret != nil {
 				log.Println(ret)
 				continue
-			} else {
-				if full == true {
-					RemoteAddIfaces(one_machine.PublicIP, &one_machine.Interfaces)
-				}
-				*machines = append(*machines, one_machine)
 			}
+			if full == true {
+				SetHostname(&one_machine)
+				RemoteAddIfaces(one_machine.PublicIP, &one_machine.Interfaces)
+			}
+			*machines = append(*machines, one_machine)
 		}
 	}
 }

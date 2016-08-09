@@ -26,7 +26,7 @@ type EtcdNode struct {
 func Fetch(url string) []byte {
 	var b []byte
 
-	log.Printf("GET %s ...\n", url)
+	log.Printf("%s GET %s ...", FuncNameF(Fetch), url)
 	r, err := http.Get(url)
 	if err != nil {
 		log.Println(err)
