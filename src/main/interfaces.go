@@ -12,9 +12,6 @@ type Iface struct {
 	IPv4    string
 	CIDR    string
 	Netmask int
-
-	HostIP  string
-	HostID  string
 }
 
 func LocalIfaces() []Iface {
@@ -41,29 +38,24 @@ func LocalIfaces() []Iface {
 	return ifaces
 }
 
-func RemoteIfaces(machines []Machine, interfaces *[]Iface) {
+func RemoteAddIfaces(ip string, interfaces *[]Iface) {
 	var content []byte
 	var remote_host []Iface
 
-	for _, m := range machines {
+	content = Fetch(InternalRequest(ip, CONF.Urls.Interfaces))
 
-		content = Fetch(InternalRequest(m.PublicIP, CONF.Urls.Interfaces))
-
-		if content == nil {
-			log.Printf("remote_interfaces with empty content: %s",
-				InternalRequest(m.PublicIP, CONF.Urls.Interfaces))
-			continue
-		}
-		ret := json.Unmarshal(content, &remote_host)
-		if ret != nil {
-			log.Println(ret)
-			continue
-		}
-		for _, i := range remote_host {
-			i.HostID = m.ID
-			i.HostIP = m.PublicIP
-			*interfaces = append(*interfaces, i)
-		}
+	if content == nil {
+		log.Printf("remote_interfaces with empty content: %s",
+			InternalRequest(ip, CONF.Urls.Interfaces))
+		return
+	}
+	ret := json.Unmarshal(content, &remote_host)
+	if ret != nil {
+		log.Println(ret)
+		return
+	}
+	for _, i := range remote_host {
+		*interfaces = append(*interfaces, i)
 	}
 }
 
@@ -71,7 +63,10 @@ func GetInterfaces(machines []Machine) []Iface {
 	var ifaces []Iface
 
 	if machines != nil {
-		RemoteIfaces(machines, &ifaces)
+		for _, m := range machines {
+			RemoteAddIfaces(m.PublicIP, &ifaces)
+		}
+
 	} else {
 		ifaces = LocalIfaces()
 	}

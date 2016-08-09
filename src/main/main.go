@@ -35,7 +35,7 @@ func GetMethod(w http.ResponseWriter, path string) {
 
 		var root_data Root
 
-		root_data.Machines = GetMachines()
+		root_data.Machines = GetMachines(true)
 		root_data.Interfaces = GetInterfaces(root_data.Machines)
 		MarshalAndSend(w, root_data)
 	case path == CONF.Urls.Interfaces || path == CONF.Urls.Interfaces + "/":
@@ -46,7 +46,7 @@ func GetMethod(w http.ResponseWriter, path string) {
 	case path == CONF.Urls.Machines || path == CONF.Urls.Machines + "/":
 		log.Printf("GET %s\n", path)
 
-		MarshalAndSend(w, GetMachines())
+		MarshalAndSend(w, GetMachines(false))
 
 	default:
 		NotFound(w, path)
