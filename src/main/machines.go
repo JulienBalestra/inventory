@@ -33,7 +33,6 @@ func ConstructMachine(ch chan <- Machine, node EtcdNode, full bool) {
 		ret := json.Unmarshal([]byte(n.Value), &one_machine)
 		if ret != nil {
 			log.Println(ret)
-			return
 		}
 		if full == true {
 			SetHostname(&one_machine)
