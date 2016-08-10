@@ -25,14 +25,15 @@ type Urls struct {
 
 	Machines   string
 	Interfaces string
+	Hostname   string
 
-	Probe string
+	Probe      string
 }
 
 func CreateConfig() Config {
 	var c Config
 
-	c.Port = "8080"
+	c.Port = "5000"
 	c.Protocol = "http://"
 	valid_ip := net.ParseIP("0.0.0.0")
 	c.Bind = valid_ip.String()
@@ -60,10 +61,13 @@ func CreateConfig() Config {
 	// /api/v0/probe
 	c.Urls.Probe = c.Urls.Root + "/probe"
 
+	// /api/v0/hostname
+	c.Urls.Hostname = c.Urls.Root + "/hostname"
+
 	return c
 }
 
-func InternalRequest(target string, url string) string {
+func AppRequest(target string, url string) string {
 
 	// http://1.1.1.1:8080/api/v0/machines
 	return CONF.Protocol + target + ":" + CONF.Port + url

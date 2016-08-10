@@ -43,11 +43,11 @@ func RemoteIfaces(ip string, interfaces *[]Iface) {
 	var content []byte
 
 	log.Printf("%s %s ...", FuncNameF(RemoteIfaces), ip)
-	content = Fetch(InternalRequest(ip, CONF.Urls.Interfaces))
+	content = Fetch(AppRequest(ip, CONF.Urls.Interfaces))
 
 	if content == nil {
 		log.Printf("%s with empty content: %s", FuncNameF(RemoteIfaces),
-			InternalRequest(ip, CONF.Urls.Interfaces))
+			AppRequest(ip, CONF.Urls.Interfaces))
 		return
 	}
 	ret := json.Unmarshal(content, interfaces)

@@ -59,6 +59,14 @@ func HandlerProbe(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func HandlerHostname(w http.ResponseWriter, r *http.Request) {
+	if (r.Method == "GET") {
+		log.Printf("%s GET %s", FuncNameF(HandlerHostname), CONF.Urls.Hostname)
+		h := []byte(LocalHostname())
+		w.Write(h)
+	}
+}
+
 func main() {
 	b, _ := json.Marshal(CONF)
 	log.Printf("%s", string(b))
@@ -66,6 +74,7 @@ func main() {
 	http.HandleFunc(CONF.Urls.Root, HanderRoot)
 	http.HandleFunc(CONF.Urls.Machines, HandlerMachines)
 	http.HandleFunc(CONF.Urls.Interfaces, HandlerInterfaces)
+	http.HandleFunc(CONF.Urls.Hostname, HandlerHostname)
 	http.HandleFunc(CONF.Urls.Probe, HandlerProbe)
 	http.ListenAndServe(CONF.Bind + ":" + CONF.Port, nil)
 }

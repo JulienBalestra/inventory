@@ -3,7 +3,6 @@ package main
 import (
 	"log"
 	"encoding/json"
-	"os"
 	"strings"
 )
 
@@ -17,13 +16,6 @@ type Machine struct {
 	Interfaces []Iface
 }
 
-func SetHostname(one_machine *Machine) {
-	var err error
-	one_machine.Hostname, err = os.Hostname()
-	if err != nil {
-		log.Println(err)
-	}
-}
 
 func ConstructMachine(ch chan <- Machine, node EtcdNode, full bool) {
 	log.Printf("%s %s", FuncNameF(ConstructMachine), strings.TrimPrefix(node.Key, CONF.FleetUrl))
@@ -36,7 +28,7 @@ func ConstructMachine(ch chan <- Machine, node EtcdNode, full bool) {
 			log.Println(ret)
 		}
 		if full == true {
-			SetHostname(&one_machine)
+			RemoteHostname(one_machine.PublicIP, &one_machine)
 			RemoteIfaces(one_machine.PublicIP, &one_machine.Interfaces)
 		}
 		ch <- one_machine
