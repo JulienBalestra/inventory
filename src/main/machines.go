@@ -11,18 +11,17 @@ type Machine struct {
 	PublicIP   string
 	Metadata   interface{}
 	Version    string
-	Hostname   string
 
+	Hostname   string
 	Interfaces []Iface
 }
 
-
-func ConstructMachine(ch chan <- Machine, node EtcdNode, full bool) {
-	log.Printf("%s %s", FuncNameF(ConstructMachine), strings.TrimPrefix(node.Key, CONF.FleetUrl))
+func MakeMachine(ch chan <- Machine, node EtcdNode, full bool) {
+	log.Printf("%s %s", FuncNameF(MakeMachine), strings.TrimPrefix(node.Key, CONF.FleetUrl))
 
 	var one_machine Machine
 	for _, n := range node.Nodes {
-		log.Printf("%s %s", FuncNameF(ConstructMachine), n.Value)
+		log.Printf("%s %s", FuncNameF(MakeMachine), n.Value)
 		ret := json.Unmarshal([]byte(n.Value), &one_machine)
 		if ret != nil {
 			log.Println(ret)
@@ -34,7 +33,7 @@ func ConstructMachine(ch chan <- Machine, node EtcdNode, full bool) {
 		ch <- one_machine
 	}
 	if len(node.Nodes) > 1 {
-		log.Printf("%s warning of node number %d > 1", FuncNameF(ConstructMachine), len(node.Nodes))
+		log.Printf("%s warning of node number %d > 1", FuncNameF(MakeMachine), len(node.Nodes))
 	}
 }
 
@@ -55,7 +54,7 @@ func GetMachines(full bool) []Machine {
 		ch := make(chan Machine)
 		for i, node := range reply.Node.Nodes {
 			log.Printf("%s starting %d/%d", FuncNameF(GetMachines), i + 1, nb_nodes)
-			go ConstructMachine(ch, node, full)
+			go MakeMachine(ch, node, full)
 		}
 		for i := range reply.Node.Nodes {
 			log.Printf("%s waiting %d/%d", FuncNameF(GetMachines), i + 1, nb_nodes)

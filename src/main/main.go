@@ -23,45 +23,45 @@ func NotFound(w http.ResponseWriter, path string) {
 	log.Printf("%d GET %s: 404\n", r, path)
 }
 
-func HandlerNotFound(w http.ResponseWriter, r *http.Request) {
+func HNotFound(w http.ResponseWriter, r *http.Request) {
 	if (r.Method == "GET") {
 		NotFound(w, r.URL.Path)
 	}
 }
 
-func HandlerMachines(w http.ResponseWriter, r *http.Request) {
+func HMachines(w http.ResponseWriter, r *http.Request) {
 	if (r.Method == "GET") {
-		log.Printf("%s GET %s", FuncNameF(HandlerMachines), CONF.Urls.Machines)
+		log.Printf("%s GET %s", FuncNameF(HMachines), CONF.Urls.Machines)
 		MarshalAndSend(w, GetMachines(false))
 	}
 }
 
-func HandlerInterfaces(w http.ResponseWriter, r *http.Request) {
+func HInterfaces(w http.ResponseWriter, r *http.Request) {
 	if (r.Method == "GET") {
-		log.Printf("%s GET %s", FuncNameF(HandlerInterfaces), CONF.Urls.Interfaces)
+		log.Printf("%s GET %s", FuncNameF(HInterfaces), CONF.Urls.Interfaces)
 		MarshalAndSend(w, LocalIfaces())
 	}
 }
 
-func HanderRoot(w http.ResponseWriter, r *http.Request) {
+func HRoot(w http.ResponseWriter, r *http.Request) {
 	if (r.Method == "GET") {
-		log.Printf("%s GET %s", FuncNameF(HanderRoot), CONF.Urls.Root)
+		log.Printf("%s GET %s", FuncNameF(HRoot), CONF.Urls.Root)
 
 		FullMachine := GetMachines(true)
 		MarshalAndSend(w, FullMachine)
 	}
 }
 
-func HandlerProbe(w http.ResponseWriter, r *http.Request) {
+func HProbe(w http.ResponseWriter, r *http.Request) {
 	if (r.Method == "GET") {
-		log.Printf("%s GET %s", FuncNameF(HandlerProbe), CONF.Urls.Probe)
+		log.Printf("%s GET %s", FuncNameF(HProbe), CONF.Urls.Probe)
 		w.Write([]byte("{\"probe\": true}"))
 	}
 }
 
-func HandlerHostname(w http.ResponseWriter, r *http.Request) {
+func HHostname(w http.ResponseWriter, r *http.Request) {
 	if (r.Method == "GET") {
-		log.Printf("%s GET %s", FuncNameF(HandlerHostname), CONF.Urls.Hostname)
+		log.Printf("%s GET %s", FuncNameF(HHostname), CONF.Urls.Hostname)
 		h := []byte(LocalHostname())
 		w.Write(h)
 	}
@@ -70,11 +70,11 @@ func HandlerHostname(w http.ResponseWriter, r *http.Request) {
 func main() {
 	b, _ := json.Marshal(CONF)
 	log.Printf("%s", string(b))
-	http.HandleFunc("/", HandlerNotFound)
-	http.HandleFunc(CONF.Urls.Root, HanderRoot)
-	http.HandleFunc(CONF.Urls.Machines, HandlerMachines)
-	http.HandleFunc(CONF.Urls.Interfaces, HandlerInterfaces)
-	http.HandleFunc(CONF.Urls.Hostname, HandlerHostname)
-	http.HandleFunc(CONF.Urls.Probe, HandlerProbe)
+	http.HandleFunc("/", HNotFound)
+	http.HandleFunc(CONF.Urls.Root, HRoot)
+	http.HandleFunc(CONF.Urls.Machines, HMachines)
+	http.HandleFunc(CONF.Urls.Interfaces, HInterfaces)
+	http.HandleFunc(CONF.Urls.Hostname, HHostname)
+	http.HandleFunc(CONF.Urls.Probe, HProbe)
 	http.ListenAndServe(CONF.Bind + ":" + CONF.Port, nil)
 }

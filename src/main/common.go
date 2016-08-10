@@ -42,7 +42,7 @@ func CreateConfig() Config {
 	c.EtcdAddress = "http://127.0.0.1:2379/v2/keys"
 	c.FleetUrl = "/_coreos.com/fleet/machines"
 
-	c.LogPadding = 22
+	c.LogPadding = 18
 
 
 	// Internal Application //
