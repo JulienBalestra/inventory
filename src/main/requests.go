@@ -34,7 +34,6 @@ func Fetch(url string) []byte {
 	}
 	b, err_read := ioutil.ReadAll(r.Body)
 	r.Body.Close()
-	//r.StatusCode
 	if err_read != nil {
 		log.Println(err_read)
 		return b
@@ -48,6 +47,7 @@ func MarshalAndSend(w http.ResponseWriter, i interface{}) {
 		log.Println(err_marshal)
 		return
 	}
+	w.Header().Set("Content-Type", "application/json")
 	_, err := w.Write(b)
 	if err != nil {
 		log.Println(err)

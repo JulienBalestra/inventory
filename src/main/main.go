@@ -23,41 +23,49 @@ func NotFound(w http.ResponseWriter, path string) {
 	log.Printf("%d GET %s: 404\n", r, path)
 }
 
-func GetMethod(w http.ResponseWriter, path string) {
-	var FullMachine []Machine
-
-	switch  {
-	case path == CONF.Urls.Root || path == CONF.Urls.Root + "/":
-		log.Printf("%s GET %s\n", FuncNameF(GetMethod), path)
-
-		FullMachine = GetMachines(true)
-		MarshalAndSend(w, FullMachine)
-
-	case path == CONF.Urls.Interfaces || path == CONF.Urls.Interfaces + "/":
-		log.Printf("%s GET %s\n", FuncNameF(GetMethod), path)
-
-		MarshalAndSend(w, LocalIfaces())
-
-	case path == CONF.Urls.Machines || path == CONF.Urls.Machines + "/":
-		log.Printf("%s GET %s\n", FuncNameF(GetMethod), path)
-
-		MarshalAndSend(w, GetMachines(false))
-
-	default:
-		NotFound(w, path)
+func HandlerNotFound(w http.ResponseWriter, r *http.Request) {
+	if (r.Method == "GET") {
+		NotFound(w, r.URL.Path)
 	}
-
 }
 
-func Handler(w http.ResponseWriter, r *http.Request) {
+func HandlerMachines(w http.ResponseWriter, r *http.Request) {
 	if (r.Method == "GET") {
-		GetMethod(w, r.URL.Path)
+		log.Printf("%s GET %s", FuncNameF(HandlerMachines), CONF.Urls.Machines)
+		MarshalAndSend(w, GetMachines(false))
+	}
+}
+
+func HandlerInterfaces(w http.ResponseWriter, r *http.Request) {
+	if (r.Method == "GET") {
+		log.Printf("%s GET %s", FuncNameF(HandlerInterfaces), CONF.Urls.Interfaces)
+		MarshalAndSend(w, LocalIfaces())
+	}
+}
+
+func HanderRoot(w http.ResponseWriter, r *http.Request) {
+	if (r.Method == "GET") {
+		log.Printf("%s GET %s", FuncNameF(HanderRoot), CONF.Urls.Root)
+
+		FullMachine := GetMachines(true)
+		MarshalAndSend(w, FullMachine)
+	}
+}
+
+func HandlerProbe(w http.ResponseWriter, r *http.Request) {
+	if (r.Method == "GET") {
+		log.Printf("%s GET %s", FuncNameF(HandlerProbe), CONF.Urls.Probe)
+		w.Write([]byte("{\"probe\": true}"))
 	}
 }
 
 func main() {
 	b, _ := json.Marshal(CONF)
 	log.Printf("%s", string(b))
-	http.HandleFunc("/", Handler)
+	http.HandleFunc("/", HandlerNotFound)
+	http.HandleFunc(CONF.Urls.Root, HanderRoot)
+	http.HandleFunc(CONF.Urls.Machines, HandlerMachines)
+	http.HandleFunc(CONF.Urls.Interfaces, HandlerInterfaces)
+	http.HandleFunc(CONF.Urls.Probe, HandlerProbe)
 	http.ListenAndServe(CONF.Bind + ":" + CONF.Port, nil)
 }

@@ -35,7 +35,7 @@ func LocalIfaces() []Iface {
 			ifaces = append(ifaces, iface)
 		}
 	}
-	log.Printf("%s with %d ifaces", FuncName(LocalIfaces), len(ifaces))
+	log.Printf("%s with %d ifaces", FuncNameF(LocalIfaces), len(ifaces))
 	return ifaces
 }
 

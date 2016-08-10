@@ -4,6 +4,7 @@ import (
 	"log"
 	"encoding/json"
 	"os"
+	"strings"
 )
 
 type Machine struct {
@@ -25,7 +26,7 @@ func SetHostname(one_machine *Machine) {
 }
 
 func ConstructMachine(ch chan <- Machine, node EtcdNode, full bool) {
-	log.Printf("%s %s", FuncNameF(ConstructMachine), node.Value)
+	log.Printf("%s %s", FuncNameF(ConstructMachine), strings.TrimPrefix(node.Key, CONF.FleetUrl))
 
 	var one_machine Machine
 	for _, n := range node.Nodes {
@@ -39,6 +40,9 @@ func ConstructMachine(ch chan <- Machine, node EtcdNode, full bool) {
 			RemoteIfaces(one_machine.PublicIP, &one_machine.Interfaces)
 		}
 		ch <- one_machine
+	}
+	if len(node.Nodes) > 1 {
+		log.Printf("%s warning of node number %d > 1", FuncNameF(ConstructMachine), len(node.Nodes))
 	}
 }
 

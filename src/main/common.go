@@ -25,6 +25,8 @@ type Urls struct {
 
 	Machines   string
 	Interfaces string
+
+	Probe string
 }
 
 func CreateConfig() Config {
@@ -39,7 +41,7 @@ func CreateConfig() Config {
 	c.EtcdAddress = "http://127.0.0.1:2379/v2/keys"
 	c.FleetUrl = "/_coreos.com/fleet/machines"
 
-	c.LogPadding = 15
+	c.LogPadding = 22
 
 
 	// Internal Application //
@@ -55,6 +57,9 @@ func CreateConfig() Config {
 	// /api/v0/interfaces
 	c.Urls.Interfaces = c.Urls.Root + "/interfaces"
 
+	// /api/v0/probe
+	c.Urls.Probe = c.Urls.Root + "/probe"
+
 	return c
 }
 
@@ -65,7 +70,7 @@ func InternalRequest(target string, url string) string {
 }
 
 func FuncName(i interface{}) string {
-	return runtime.FuncForPC(reflect.ValueOf(i).Pointer()).Name() + "\t"
+	return runtime.FuncForPC(reflect.ValueOf(i).Pointer()).Name()
 }
 
 func FuncNameF(i interface{}) string {
