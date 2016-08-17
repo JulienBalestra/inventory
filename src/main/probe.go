@@ -6,7 +6,7 @@ import (
 )
 
 type  ProbeResponse struct {
-	Probe bool
+	Probe    bool
 	Hostname string
 }
 
@@ -25,8 +25,8 @@ func Probe() []byte {
 	return ret
 }
 
-func is_alive(ip string) bool {
-	log.Printf("%s %s ...", FuncNameF(is_alive), ip)
+func IsAlive(ip string) bool {
+	log.Printf("%s %s ...", FuncNameF(IsAlive), ip)
 	uri := CONF.Protocol + ip + ":" + CONF.Port + CONF.Urls.Probe
 	content, _ := Fetch(uri)
 
@@ -36,8 +36,7 @@ func is_alive(ip string) bool {
 	if probe.Probe == true {
 		return true
 	} else {
-		log.Printf("%s %s DEAD", FuncNameF(is_alive), ip)
+		log.Printf("%s %s DEAD", FuncNameF(IsAlive), ip)
 		return false
 	}
-
 }

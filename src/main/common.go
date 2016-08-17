@@ -20,6 +20,8 @@ type Config struct {
 	HttpClientTimeout time.Duration
 	GoRoutineTimeout  time.Duration
 	GoRoutineSleep    time.Duration
+
+	prefix            []string
 }
 
 type Urls struct {
@@ -50,6 +52,9 @@ func CreateConfig() Config {
 	c.FleetMachineUrl = "/_coreos.com/fleet/machines"
 
 	c.LogPadding = 18
+
+	c.prefix = append(c.prefix, "192.168")
+	c.prefix = append(c.prefix, "10.1.")
 
 
 	// Internal Application //

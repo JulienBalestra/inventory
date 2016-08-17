@@ -15,13 +15,13 @@ func LocalHostname() string {
 	return hostname
 }
 
-func RemoteHostname(ip string, machine *Machine) {
+func RemoteHostname(m *Machine, d QueryData) {
 
-	c, err := Fetch(AppRequest(ip, CONF.Urls.Hostname))
+	c, err := Fetch(AppRequest(m.PublicIP, CONF.Urls.Hostname))
 	if err != nil {
 		log.Printf("%s error %v", FuncNameF(RemoteHostname), err)
 		return
 	}
 
-	machine.Hostname = string(c)
+	m.Hostname = string(c)
 }

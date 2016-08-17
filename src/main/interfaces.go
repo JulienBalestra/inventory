@@ -39,12 +39,12 @@ func LocalIfaces() []Iface {
 	return ifaces
 }
 
-func RemoteIfaces(ip string, interfaces *[]Iface) {
+func RemoteIfaces(m *Machine, d QueryData) {
 	var content []byte
 
-	log.Printf("%s %s ...", FuncNameF(RemoteIfaces), ip)
+	log.Printf("%s %s ...", FuncNameF(RemoteIfaces), m.PublicIP)
 
-	content, err := Fetch(AppRequest(ip, CONF.Urls.Interfaces))
+	content, err := Fetch(AppRequest(m.PublicIP, CONF.Urls.Interfaces))
 	if err != nil {
 		log.Printf("%s error %v", FuncNameF(GetMachines), err)
 		return
@@ -52,13 +52,15 @@ func RemoteIfaces(ip string, interfaces *[]Iface) {
 
 	if content == nil {
 		log.Printf("%s with empty content: %s", FuncNameF(RemoteIfaces),
-			AppRequest(ip, CONF.Urls.Interfaces))
+			AppRequest(m.PublicIP, CONF.Urls.Interfaces))
 		return
 	}
-	ret := json.Unmarshal(content, interfaces)
+	ret := json.Unmarshal(content, &m.Interfaces)
 	if ret != nil {
 		log.Println(ret)
+		log.Printf("%s ERROR %s with NO ifaces", FuncNameF(RemoteIfaces), m.PublicIP)
+
 		return
 	}
-	log.Printf("%s %s with %d ifaces", FuncNameF(RemoteIfaces), ip, len(*interfaces))
+	log.Printf("%s %s with %d ifaces", FuncNameF(RemoteIfaces), m.PublicIP, len(m.Interfaces))
 }

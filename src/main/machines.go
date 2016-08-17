@@ -8,44 +8,46 @@ import (
 )
 
 type Machine struct {
-	ID         string
-	PublicIP   string
-	Metadata   interface{}
-	Version    string
+	ID          string
+	PublicIP    string
+	Metadata    interface{}
+	Version     string
 
-	Hostname   string
-	Interfaces []Iface
-	Alive      bool
+	Hostname    string
+	Interfaces  []Iface
+	Alive       bool
+
+	Connections []ConnectStatus
 }
 
-func MakeMachine(ch chan <- Machine, node EtcdNode, full bool) {
+type QueryData struct {
+	machines []Machine
+	reply    EtcdReply
+	fts      []func(m *Machine, re QueryData)
+}
+
+func MakeMachine(d QueryData, ch chan <- Machine, node EtcdNode) {
 	log.Printf("%s %s", FuncNameF(MakeMachine),
 		strings.TrimPrefix(node.Key, CONF.FleetMachineUrl + "/"))
 
-	var one_machine Machine
+	var m Machine
 
 	if len(node.Nodes) != 1 {
 		log.Printf("%s warning of node number %d != 1", FuncNameF(MakeMachine), len(node.Nodes))
 	}
 
 	for _, n := range node.Nodes {
-		ret := json.Unmarshal([]byte(n.Value), &one_machine)
+		ret := json.Unmarshal([]byte(n.Value), &m)
 		if ret != nil {
 			log.Println(ret)
-		}
-		if full == true {
-			if is_alive(one_machine.PublicIP) == false {
-				log.Printf("%s %s is dead", FuncNameF(MakeMachine), one_machine)
-				one_machine.Alive = false
-			} else {
-				one_machine.Alive = true
-				RemoteHostname(one_machine.PublicIP, &one_machine)
-				RemoteIfaces(one_machine.PublicIP, &one_machine.Interfaces)
+		} else if IsAlive(m.PublicIP) {
+			m.Alive = true
+			for _, ft := range d.fts {
+				ft(&m, d)
 			}
-		} else {
-			one_machine.Alive = false
 		}
-		ch <- one_machine
+
+		ch <- m
 		break
 	}
 }
@@ -100,9 +102,20 @@ func MachineNb(reply EtcdReply) int {
 	return nb_nodes
 }
 
+func StartRoutine(d QueryData, machines *[]Machine) {
+	nb_nodes := MachineNb(d.reply)
+
+	ch_machines := make(chan Machine, nb_nodes)
+	for i, node := range d.reply.Node.Nodes {
+		log.Printf("%s starting %d/%d", FuncNameF(StartRoutine), i + 1, nb_nodes)
+		go MakeMachine(d, ch_machines, node)
+	}
+	AggregateMachines(ch_machines, machines, nb_nodes)
+}
+
 func GetMachines(full bool) []Machine {
 	var machines []Machine
-	var reply EtcdReply
+	var d QueryData
 
 	content, err := Fetch(CONF.EtcdAddress + CONF.FleetMachineUrl + "/?recursive=true")
 	if err != nil {
@@ -110,21 +123,24 @@ func GetMachines(full bool) []Machine {
 		return machines
 	}
 
-	ret := json.Unmarshal(content, &reply)
+	ret := json.Unmarshal(content, &d.reply)
 	if ret != nil {
 		log.Println(ret)
 		return machines
 	}
-	nb_nodes := MachineNb(reply)
-	if nb_nodes > 0 {
-		ch := make(chan Machine, nb_nodes)
-		for i, node := range reply.Node.Nodes {
-			log.Printf("%s starting %d/%d", FuncNameF(GetMachines), i + 1, nb_nodes)
-			go MakeMachine(ch, node, full)
-		}
-		AggregateMachines(ch, &machines, nb_nodes)
+
+
+	if full {
+		d.fts = append(d.fts, RemoteIfaces)
+		StartRoutine(d, &d.machines)
+		d.fts = append(d.fts, RemoteTangle)
+		d.fts = append(d.fts, RemoteHostname)
+		StartRoutine(d, &machines)
+	} else {
+		StartRoutine(d, &machines)
 	}
-	log.Printf("%s return [%d/%d]Machine", FuncNameF(GetMachines), len(machines), nb_nodes)
+
+	log.Printf("%s return [%d]Machine", FuncNameF(GetMachines), len(machines))
 
 	return machines
 }
