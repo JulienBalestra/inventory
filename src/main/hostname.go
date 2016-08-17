@@ -17,5 +17,11 @@ func LocalHostname() string {
 
 func RemoteHostname(ip string, machine *Machine) {
 
-	machine.Hostname = string(Fetch(AppRequest(ip, CONF.Urls.Hostname)))
+	c, err := Fetch(AppRequest(ip, CONF.Urls.Hostname))
+	if err != nil {
+		log.Printf("%s error %v", FuncNameF(RemoteHostname), err)
+		return
+	}
+
+	machine.Hostname = string(c)
 }

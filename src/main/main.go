@@ -55,7 +55,8 @@ func HRoot(w http.ResponseWriter, r *http.Request) {
 func HProbe(w http.ResponseWriter, r *http.Request) {
 	if (r.Method == "GET") {
 		log.Printf("%s GET %s", FuncNameF(HProbe), CONF.Urls.Probe)
-		w.Write([]byte("{\"probe\": true}"))
+		p := Probe()
+		w.Write(p)
 	}
 }
 
@@ -69,6 +70,7 @@ func HHostname(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	b, _ := json.Marshal(CONF)
+	http.DefaultClient.Timeout = CONF.HttpClientTimeout
 	log.Printf("%s", string(b))
 	http.HandleFunc("/", HNotFound)
 	http.HandleFunc(CONF.Urls.Root, HRoot)

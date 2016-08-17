@@ -43,7 +43,12 @@ func RemoteIfaces(ip string, interfaces *[]Iface) {
 	var content []byte
 
 	log.Printf("%s %s ...", FuncNameF(RemoteIfaces), ip)
-	content = Fetch(AppRequest(ip, CONF.Urls.Interfaces))
+
+	content, err := Fetch(AppRequest(ip, CONF.Urls.Interfaces))
+	if err != nil {
+		log.Printf("%s error %v", FuncNameF(GetMachines), err)
+		return
+	}
 
 	if content == nil {
 		log.Printf("%s with empty content: %s", FuncNameF(RemoteIfaces),

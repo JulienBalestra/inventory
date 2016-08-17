@@ -4,18 +4,22 @@ import (
 	"net"
 	"runtime"
 	"reflect"
+	"time"
 )
 
 type Config struct {
-	Urls        Urls
-	Port        string
-	Protocol    string
-	Bind        string
+	Urls              Urls
+	Port              string
+	Protocol          string
+	Bind              string
 
-	EtcdAddress string
-	FleetUrl    string
+	EtcdAddress       string
+	FleetUrl          string
 
-	LogPadding  int
+	LogPadding        int
+	HttpClientTimeout time.Duration
+	GoRoutineTimeout time.Duration
+	GoRoutineSleep time.Duration
 }
 
 type Urls struct {
@@ -37,6 +41,9 @@ func CreateConfig() Config {
 	c.Protocol = "http://"
 	valid_ip := net.ParseIP("0.0.0.0")
 	c.Bind = valid_ip.String()
+	c.HttpClientTimeout = time.Millisecond * 500
+	c.GoRoutineSleep = time.Millisecond * 100
+	c.GoRoutineTimeout = time.Second * 5
 
 	// Common use of Etcd and Fleet
 	c.EtcdAddress = "http://127.0.0.1:2379/v2/keys"

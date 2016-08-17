@@ -8,7 +8,9 @@ SRCS = \
 machines.go \
 main.go \
 interfaces.go \
-requests.go
+requests.go \
+probe.go \
+common.go
 
 default: $(TARGET)
 
@@ -20,5 +22,8 @@ $(TARGET): $(addprefix $(SRC_DIR), %.go)
 
 clean:
 	rm -v $(TARGET) || true
+
+deploy: $(TARGET)
+	swift --insecure upload $(TARGET) $(TARGET)
 
 re: clean $(TARGET)

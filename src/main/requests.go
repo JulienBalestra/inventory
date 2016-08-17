@@ -23,22 +23,23 @@ type EtcdNode struct {
 	Dir           bool
 }
 
-func Fetch(url string) []byte {
+func Fetch(url string) ([]byte, error) {
 	var b []byte
 
 	log.Printf("%s GET %s ...", FuncNameF(Fetch), url)
-	r, err := http.Get(url)
+
+	r, err := http.DefaultClient.Get(url)
 	if err != nil {
 		log.Println(err)
-		return b
+		return b, err
 	}
 	b, err_read := ioutil.ReadAll(r.Body)
 	r.Body.Close()
 	if err_read != nil {
 		log.Println(err_read)
-		return b
+		return b, err_read
 	}
-	return b
+	return b, nil
 }
 
 func MarshalAndSend(w http.ResponseWriter, i interface{}) {
