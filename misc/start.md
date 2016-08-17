@@ -5,6 +5,9 @@
             
     etcdctl set /_coreos.com/fleet/machines/002/object  \
         '{"ID":"002","PublicIP":"localhost","Metadata":{"role":"services"},"Version":"0.11.7"}'
+            
+    etcdctl set /_coreos.com/fleet/machines/003/object  \
+        '{"ID":"003","PublicIP":"172.17.0.254","Metadata":{"role":"nohere"},"Version":"0.11.7"}'
                     
                     
                     
@@ -16,12 +19,14 @@
 ## Quick deploy
 
 
-    cat << EOF > inventory.service
-    [Service]
-    ExecStartPre=/usr/bin/curl -Lk inventory/inventory -o /usr/bin/inventory
-    ExecStartPre=/bin/chmod +x /usr/bin/inventory
-    ExecStart=/usr/bin/inventory
-    
-    [X-Fleet]
-    Global=true
-    EOF
+cat << EOF > inventory.service
+[Service]
+ExecStartPre=/usr/bin/curl -Lk inventory/inventory -o /usr/bin/inventory
+ExecStartPre=/bin/chmod +x /usr/bin/inventory
+ExecStart=/usr/bin/inventory
+
+[X-Fleet]
+Global=true
+EOF
+fleetctl destroy inventory.service 
+fleetctl start inventory.service
