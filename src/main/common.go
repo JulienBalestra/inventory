@@ -14,12 +14,12 @@ type Config struct {
 	Bind              string
 
 	EtcdAddress       string
-	FleetUrl          string
+	FleetMachineUrl   string
 
 	LogPadding        int
 	HttpClientTimeout time.Duration
-	GoRoutineTimeout time.Duration
-	GoRoutineSleep time.Duration
+	GoRoutineTimeout  time.Duration
+	GoRoutineSleep    time.Duration
 }
 
 type Urls struct {
@@ -47,7 +47,7 @@ func CreateConfig() Config {
 
 	// Common use of Etcd and Fleet
 	c.EtcdAddress = "http://127.0.0.1:2379/v2/keys"
-	c.FleetUrl = "/_coreos.com/fleet/machines"
+	c.FleetMachineUrl = "/_coreos.com/fleet/machines"
 
 	c.LogPadding = 18
 

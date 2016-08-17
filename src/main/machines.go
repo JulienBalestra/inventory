@@ -19,7 +19,8 @@ type Machine struct {
 }
 
 func MakeMachine(ch chan <- Machine, node EtcdNode, full bool) {
-	log.Printf("%s %s", FuncNameF(MakeMachine), strings.TrimPrefix(node.Key, CONF.FleetUrl + "/"))
+	log.Printf("%s %s", FuncNameF(MakeMachine),
+		strings.TrimPrefix(node.Key, CONF.FleetMachineUrl + "/"))
 
 	var one_machine Machine
 
@@ -103,7 +104,7 @@ func GetMachines(full bool) []Machine {
 	var machines []Machine
 	var reply EtcdReply
 
-	content, err := Fetch(CONF.EtcdAddress + CONF.FleetUrl + "/?recursive=true")
+	content, err := Fetch(CONF.EtcdAddress + CONF.FleetMachineUrl + "/?recursive=true")
 	if err != nil {
 		log.Printf("%s error %v", FuncNameF(GetMachines), err)
 		return machines
