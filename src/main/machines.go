@@ -23,6 +23,7 @@ type Machine struct {
 type QueryData struct {
 	machines []Machine
 	reply    EtcdReply
+	all_ips  []string
 	fts      []func(m *Machine, re QueryData)
 }
 
@@ -129,10 +130,11 @@ func GetMachines(full bool) []Machine {
 		return machines
 	}
 
-
 	if full {
 		d.fts = append(d.fts, RemoteIfaces)
 		StartRoutine(d, &d.machines)
+		log.Printf("%s Full start\n\n", FuncNameF(GetMachines))
+		d.all_ips = GetSomeIPv4(&d.machines, IsWantedPrefix)
 		d.fts = append(d.fts, RemoteTangle)
 		d.fts = append(d.fts, RemoteHostname)
 		StartRoutine(d, &machines)

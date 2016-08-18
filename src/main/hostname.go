@@ -17,7 +17,7 @@ func LocalHostname() string {
 
 func RemoteHostname(m *Machine, d QueryData) {
 
-	c, err := Fetch(AppRequest(m.PublicIP, CONF.Urls.Hostname))
+	c, err := Fetch(SelfRequest(m.PublicIP, CONF.Urls.Hostname))
 	if err != nil {
 		log.Printf("%s error %v", FuncNameF(RemoteHostname), err)
 		return

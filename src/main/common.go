@@ -32,6 +32,7 @@ type Urls struct {
 	Machines   string
 	Interfaces string
 	Hostname   string
+	Tangle     string
 
 	Probe      string
 }
@@ -76,10 +77,13 @@ func CreateConfig() Config {
 	// /api/v0/hostname
 	c.Urls.Hostname = c.Urls.Root + "/hostname"
 
+	// /api/v0/tangle
+	c.Urls.Tangle = c.Urls.Root + "/tangle"
+
 	return c
 }
 
-func AppRequest(target string, url string) string {
+func SelfRequest(target string, url string) string {
 
 	// http://1.1.1.1:8080/api/v0/machines
 	return CONF.Protocol + target + ":" + CONF.Port + url

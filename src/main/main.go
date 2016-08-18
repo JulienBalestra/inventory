@@ -24,9 +24,7 @@ func NotFound(w http.ResponseWriter, path string) {
 }
 
 func HNotFound(w http.ResponseWriter, r *http.Request) {
-	if (r.Method == "GET") {
-		NotFound(w, r.URL.Path)
-	}
+	NotFound(w, r.URL.Path)
 }
 
 func HMachines(w http.ResponseWriter, r *http.Request) {
@@ -68,6 +66,18 @@ func HHostname(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func HTangle(w http.ResponseWriter, r *http.Request) {
+	if (r.Method == "POST") {
+		log.Printf("%s POST %s", FuncNameF(HTangle), CONF.Urls.Tangle)
+		if r.ContentLength > 0 {
+			t := Tangle(r)
+			w.Write(t)
+		} else {
+			log.Printf("%s POST %s EMPTY", FuncNameF(HTangle), CONF.Urls.Tangle)
+		}
+	}
+}
+
 func main() {
 	b, _ := json.Marshal(CONF)
 	http.DefaultClient.Timeout = CONF.HttpClientTimeout
@@ -78,5 +88,6 @@ func main() {
 	http.HandleFunc(CONF.Urls.Interfaces, HInterfaces)
 	http.HandleFunc(CONF.Urls.Hostname, HHostname)
 	http.HandleFunc(CONF.Urls.Probe, HProbe)
+	http.HandleFunc(CONF.Urls.Tangle, HTangle)
 	http.ListenAndServe(CONF.Bind + ":" + CONF.Port, nil)
 }

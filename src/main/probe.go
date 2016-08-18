@@ -7,14 +7,12 @@ import (
 
 type  ProbeResponse struct {
 	Probe    bool
-	Hostname string
 }
 
 func Probe() []byte {
 	var probe ProbeResponse
 	var ret []byte
 
-	probe.Hostname = LocalHostname()
 	probe.Probe = true
 
 	ret, err := json.Marshal(probe)

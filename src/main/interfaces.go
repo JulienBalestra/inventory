@@ -44,7 +44,7 @@ func RemoteIfaces(m *Machine, d QueryData) {
 
 	log.Printf("%s %s ...", FuncNameF(RemoteIfaces), m.PublicIP)
 
-	content, err := Fetch(AppRequest(m.PublicIP, CONF.Urls.Interfaces))
+	content, err := Fetch(SelfRequest(m.PublicIP, CONF.Urls.Interfaces))
 	if err != nil {
 		log.Printf("%s error %v", FuncNameF(GetMachines), err)
 		return
@@ -52,7 +52,7 @@ func RemoteIfaces(m *Machine, d QueryData) {
 
 	if content == nil {
 		log.Printf("%s with empty content: %s", FuncNameF(RemoteIfaces),
-			AppRequest(m.PublicIP, CONF.Urls.Interfaces))
+			SelfRequest(m.PublicIP, CONF.Urls.Interfaces))
 		return
 	}
 	ret := json.Unmarshal(content, &m.Interfaces)
