@@ -137,10 +137,8 @@ func GetMachines(full bool) []Machine {
 		d.all_ips = GetSomeIPv4(&d.machines, IsWantedPrefix)
 		d.fts = append(d.fts, RemoteTangle)
 		d.fts = append(d.fts, RemoteHostname)
-		MachineRo(d, &machines)
-	} else {
-		MachineRo(d, &machines)
 	}
+	MachineRo(d, &machines)
 
 	log.Printf("%s return [%d]Machine", FuncNameF(GetMachines), len(machines))
 
