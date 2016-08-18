@@ -70,7 +70,7 @@ func HTangle(w http.ResponseWriter, r *http.Request) {
 	if (r.Method == "POST") {
 		log.Printf("%s POST %s", FuncNameF(HTangle), CONF.Urls.Tangle)
 		if r.ContentLength > 0 {
-			t := Tangle(r)
+			t := TangleRo(r)
 			w.Write(t)
 		} else {
 			log.Printf("%s POST %s EMPTY", FuncNameF(HTangle), CONF.Urls.Tangle)

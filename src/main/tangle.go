@@ -48,7 +48,7 @@ func GetPostData(r *http.Request) []string {
 	n, err := r.Body.Read(p)
 	if n == 0 {
 		log.Printf("%s ContentLen(%d) Read(%d)",
-			FuncNameF(Tangle), r.ContentLength, n)
+			FuncNameF(TangleRo), r.ContentLength, n)
 	} else if int64(n) != r.ContentLength && err != nil {
 		log.Println(FuncNameF(HTangle), "ERROR", err)
 		return given_ips
@@ -66,29 +66,24 @@ func TimeNowMillisecond() float32 {
 	return float32(time.Now().Nanosecond()) / 1000000
 }
 
-func TangleQuery(ips []string) []ConnectStatus {
+func MakeTangle(ch chan ConnectStatus, ip string) {
 	var conn ConnectStatus
-	var conns []ConnectStatus
 	var reach bool
 
-	log.Printf("%s starting for IP[%d]", FuncNameF(TangleQuery), len(ips))
+	log.Printf("%s starting", FuncNameF(MakeTangle))
 
-	for _, ip := range ips {
-		conn.IPv4 = ip
-		start := TimeNowMillisecond()
-		reach = IsAlive(ip)
-		if reach {
-			conn.Reach = true
-			conn.LatencyMs = TimeNowMillisecond() - start
-		}
-		conns = append(conns, conn)
+	conn.IPv4 = ip
+	start := TimeNowMillisecond()
+	reach = IsAlive(ip)
+	if reach {
+		conn.Reach = true
+		conn.LatencyMs = TimeNowMillisecond() - start
 	}
-	log.Printf("%s finished with conns[%d]", FuncNameF(TangleQuery), len(conns))
-
-	return conns
+	ch <- conn
+	log.Printf("%s finished", FuncNameF(MakeTangle))
 }
 
-func Tangle(r *http.Request) []byte {
+func TangleRo(r *http.Request) []byte {
 
 	var ips []string
 	var skip bool
@@ -97,7 +92,7 @@ func Tangle(r *http.Request) []byte {
 		skip = false
 		for _, local := range LocalIfaces() {
 			if ip == local.IPv4 {
-				log.Printf("%s skip local %s", FuncNameF(Tangle), ip)
+				log.Printf("%s skip local %s", FuncNameF(TangleRo), ip)
 				skip = true
 				break
 			}
@@ -106,9 +101,19 @@ func Tangle(r *http.Request) []byte {
 			ips = append(ips, ip)
 		}
 	}
-	log.Printf("%s to query IP[%d]", FuncNameF(Tangle), len(ips))
+	log.Printf("%s to query IP[%d]", FuncNameF(TangleRo), len(ips))
 
-	conns := TangleQuery(ips)
+	ch := make(chan ConnectStatus, len(ips))
+	for i, ip := range ips {
+		log.Printf("%s starting %d/%d", FuncNameF(TangleRo), i + 1, len(ips))
+		go MakeTangle(ch, ip)
+	}
+	var conns []ConnectStatus
+	for i := range ips {
+		log.Printf("%s waiting %d/%d", FuncNameF(TangleRo), i + 1, len(ips))
+		conns = append(conns, <-ch)
+	}
+	close(ch)
 	ret, _ := json.Marshal(conns)
 
 	return ret

@@ -103,12 +103,12 @@ func MachineNb(reply EtcdReply) int {
 	return nb_nodes
 }
 
-func StartRoutine(d QueryData, machines *[]Machine) {
+func MachineRo(d QueryData, machines *[]Machine) {
 	nb_nodes := MachineNb(d.reply)
 
 	ch_machines := make(chan Machine, nb_nodes)
 	for i, node := range d.reply.Node.Nodes {
-		log.Printf("%s starting %d/%d", FuncNameF(StartRoutine), i + 1, nb_nodes)
+		log.Printf("%s starting %d/%d", FuncNameF(MachineRo), i + 1, nb_nodes)
 		go MakeMachine(d, ch_machines, node)
 	}
 	AggregateMachines(ch_machines, machines, nb_nodes)
@@ -132,14 +132,14 @@ func GetMachines(full bool) []Machine {
 
 	if full {
 		d.fts = append(d.fts, RemoteIfaces)
-		StartRoutine(d, &d.machines)
+		MachineRo(d, &d.machines)
 		log.Printf("%s Full start\n\n", FuncNameF(GetMachines))
 		d.all_ips = GetSomeIPv4(&d.machines, IsWantedPrefix)
 		d.fts = append(d.fts, RemoteTangle)
 		d.fts = append(d.fts, RemoteHostname)
-		StartRoutine(d, &machines)
+		MachineRo(d, &machines)
 	} else {
-		StartRoutine(d, &machines)
+		MachineRo(d, &machines)
 	}
 
 	log.Printf("%s return [%d]Machine", FuncNameF(GetMachines), len(machines))
