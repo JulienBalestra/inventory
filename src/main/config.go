@@ -35,6 +35,8 @@ type Urls struct {
 	Tangle     string
 
 	Probe      string
+	Help       string
+	Ui       string
 }
 
 func CreateConfig() Config {
@@ -79,6 +81,12 @@ func CreateConfig() Config {
 
 	// /api/v0/tangle
 	c.Urls.Tangle = c.Urls.Root + "/tangle"
+
+
+	// /help
+	c.Urls.Help = "/help"
+
+	c.Urls.Ui = "/"
 
 	return c
 }

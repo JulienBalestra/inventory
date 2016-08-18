@@ -4,13 +4,13 @@ import (
 	"net/http"
 	"log"
 	"encoding/json"
+	"os"
 )
 
 var CONF = CreateConfig()
 
-func NotFound(w http.ResponseWriter, path string) {
+func HelpMessage(w http.ResponseWriter, path string) {
 
-	w.WriteHeader(404)
 	b, j_error := json.Marshal(CONF.Urls)
 	if j_error != nil {
 		log.Println(j_error)
@@ -20,11 +20,11 @@ func NotFound(w http.ResponseWriter, path string) {
 		log.Println(err)
 	}
 
-	log.Printf("%d GET %s: 404\n", r, path)
+	log.Printf("%d GET %s\n", r, path)
 }
 
-func HNotFound(w http.ResponseWriter, r *http.Request) {
-	NotFound(w, r.URL.Path)
+func HHelp(w http.ResponseWriter, r *http.Request) {
+	HelpMessage(w, r.URL.Path)
 }
 
 func HMachines(w http.ResponseWriter, r *http.Request) {
@@ -82,8 +82,15 @@ func main() {
 	b, _ := json.Marshal(CONF)
 	http.DefaultClient.Timeout = CONF.HttpClientTimeout
 	log.Printf("%s", string(b))
-	http.HandleFunc("/", HNotFound)
+
+	if os.Getenv("HTTP_SERVE") == "fs" {
+		http.Handle(CONF.Urls.Ui, http.FileServer(http.Dir("./ui")))
+	} else {
+		http.Handle(CONF.Urls.Ui, http.FileServer(assetFS()))
+	}
+
 	http.HandleFunc(CONF.Urls.Root, HRoot)
+	http.HandleFunc(CONF.Urls.Help, HHelp)
 	http.HandleFunc(CONF.Urls.Machines, HMachines)
 	http.HandleFunc(CONF.Urls.Interfaces, HInterfaces)
 	http.HandleFunc(CONF.Urls.Hostname, HHostname)

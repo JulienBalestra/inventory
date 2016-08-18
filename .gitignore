@@ -3,3 +3,4 @@ inventory.iml
 /bin
 inventory
 environment
+/src/main/bindata_assetfs.go
