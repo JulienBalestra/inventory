@@ -12,9 +12,9 @@ import (
 )
 
 type ConnectStatus struct {
-	IPv4    string
-	Reach   bool
-	Latency float32
+	IPv4      string
+	Reach     bool
+	LatencyMs float32
 }
 
 func GetSomeIPv4(machines *[]Machine, iswanted func(ip string) bool) []string {
@@ -62,21 +62,24 @@ func GetPostData(r *http.Request) []string {
 	return given_ips
 }
 
+func TimeNowMillisecond() float32 {
+	return float32(time.Now().Nanosecond()) / 1000000
+}
+
 func TangleQuery(ips []string) []ConnectStatus {
 	var conn ConnectStatus
 	var conns []ConnectStatus
 	var reach bool
 
-
 	log.Printf("%s starting for IP[%d]", FuncNameF(TangleQuery), len(ips))
 
 	for _, ip := range ips {
 		conn.IPv4 = ip
-		start := float32(time.Now().Nanosecond()) / 1000000
+		start := TimeNowMillisecond()
 		reach = IsAlive(ip)
 		if reach {
 			conn.Reach = true
-			conn.Latency = float32(time.Now().Nanosecond()) / 1000000 - start
+			conn.LatencyMs = TimeNowMillisecond() - start
 		}
 		conns = append(conns, conn)
 	}
@@ -87,16 +90,12 @@ func TangleQuery(ips []string) []ConnectStatus {
 
 func Tangle(r *http.Request) []byte {
 
-	given_ips := GetPostData(r)
-
 	var ips []string
-
-	local_ips := LocalIfaces()
-
 	var skip bool
-	for _, ip := range given_ips {
+
+	for _, ip := range GetPostData(r) {
 		skip = false
-		for _, local := range local_ips {
+		for _, local := range LocalIfaces() {
 			if ip == local.IPv4 {
 				log.Printf("%s skip local %s", FuncNameF(Tangle), ip)
 				skip = true
@@ -105,7 +104,6 @@ func Tangle(r *http.Request) []byte {
 		}
 		if skip == false {
 			ips = append(ips, ip)
-
 		}
 	}
 	log.Printf("%s to query IP[%d]", FuncNameF(Tangle), len(ips))
@@ -134,7 +132,8 @@ func RemoteTangle(m *Machine, d QueryData) {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		panic(err)
+		log.Println("ERROR", err)
+		return
 	}
 	defer resp.Body.Close()
 
