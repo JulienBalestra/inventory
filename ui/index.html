@@ -2,12 +2,32 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
-Hello World
 
-<script src="demo.js"></script>
+    <script src="node_modules/jquery/dist/jquery.min.js"></script>
+    <script src="node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
+
+    <link rel="stylesheet" href="node_modules/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="node_modules/bootstrap/dist/css/bootstrap-theme.min.css">
+
+    <title>Inventory</title>
+</head>
+
+<body>
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <div id="status"></div>
+            <table class="table table-striped" id="machines">
+                <tr>
+                    <td>ID</td>
+                    <td>Public IP</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script src="js/app.js"></script>
 
 </body>
 </html>

@@ -77,16 +77,16 @@ func closer(ch chan Machine, count chan int, size int) {
 	}
 }
 
-func AggregateMachines(ch_machine chan Machine, machines *[]Machine, nb_nodes int) {
+func AggrMachines(ch_machine chan Machine, machines *[]Machine, nb_nodes int) {
 
 	ch_count := make(chan int, nb_nodes)
 	go closer(ch_machine, ch_count, nb_nodes)
 
 	for i := 0; i < nb_nodes; i++ {
-		log.Printf("%s waiting %d/%d", FuncNameF(GetMachines), i + 1, nb_nodes)
+		log.Printf("%s waiting %d/%d", FuncNameF(AggrMachines), i + 1, nb_nodes)
 		*machines = append(*machines, <-ch_machine)
 		ch_count <- i
-		log.Printf("%s finished %d/%d", FuncNameF(GetMachines), i + 1, nb_nodes)
+		log.Printf("%s finished %d/%d", FuncNameF(AggrMachines), i + 1, nb_nodes)
 	}
 }
 
@@ -107,11 +107,10 @@ func MachineRo(d QueryData, machines *[]Machine) {
 	nb_nodes := MachineNb(d.reply)
 
 	ch_machines := make(chan Machine, nb_nodes)
-	for i, node := range d.reply.Node.Nodes {
-		log.Printf("%s starting %d/%d", FuncNameF(MachineRo), i + 1, nb_nodes)
+	for _, node := range d.reply.Node.Nodes {
 		go MakeMachine(d, ch_machines, node)
 	}
-	AggregateMachines(ch_machines, machines, nb_nodes)
+	AggrMachines(ch_machines, machines, nb_nodes)
 }
 
 func GetMachines(full bool) []Machine {

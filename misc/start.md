@@ -21,7 +21,7 @@
 
 cat << EOF > inventory.service
 [Service]
-ExecStartPre=/usr/bin/curl -Lk inventory/inventory -o /usr/bin/inventory
+ExecStartPre=/usr/bin/curl -Lk ${BUCKET}/inventory/inventory -o /usr/bin/inventory
 ExecStartPre=/bin/chmod +x /usr/bin/inventory
 ExecStart=/usr/bin/inventory
 
@@ -30,3 +30,11 @@ Global=true
 EOF
 fleetctl destroy inventory.service 
 fleetctl start inventory.service
+
+
+
+etcdctl set /traefik/backends/inventory/servers/server0/weight '1'
+etcdctl set /traefik/backends/inventory/servers/server0/url 'http://127.0.0.1:5000'
+
+etcdctl set /traefik/frontends/inventory/backend 'inventory'
+etcdctl set /traefik/frontends/inventory/routes/inventory/rule 'PathPrefix:/'

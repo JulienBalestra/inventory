@@ -4,3 +4,8 @@ inventory.iml
 inventory
 environment
 /src/main/bindata_assetfs.go
+/ui/node_modules/
+/ui/ui.iml
+*.[oa]
+pkg/
+src/github.com

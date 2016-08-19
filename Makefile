@@ -1,32 +1,29 @@
 SRC_DIR=src/main
 BIN_DIR=bin/
 TARGET=inventory
+ASSETFS=bindata_assetfs.go
 PACKAGE=main
 CC=go
 
-SRCS = \
-machines.go \
-main.go \
-interfaces.go \
-requests.go \
-probe.go \
-common.go
+UI=ui
 
 default: $(TARGET)
 
-$(addprefix $(SRC_DIR), %.go):
-	@
+js:
+	make -C $(UI)
 
-assetfs:
-	rm -v $(SRC_DIR)/bindata_assetfs.go
-	go-bindata-assetfs ./ui/...
-	mv -v bindata_assetfs.go $(SRC_DIR)
+assetfs: js
+	@go-bindata-assetfs $(UI)/...
+	@mv -v $(ASSETFS) $(SRC_DIR)
 
-$(TARGET): $(addprefix $(SRC_DIR), %.go) assetfs
+$(TARGET): assetfs
 	CGO_ENABLED=0 GOOS=linux $(CC) build -ldflags '-w' -o $(TARGET) $(PACKAGE)
 
 clean:
 	rm -v $(TARGET) || true
+
+fclean: clean
+	make -C $(UI) fclean
 
 deploy: $(TARGET)
 	swift --insecure upload $(TARGET) $(TARGET)
