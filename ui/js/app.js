@@ -93,6 +93,11 @@ function statusReply(status) {
 }
 
 function readData(sData) {
+
+    if (sData == null) {
+        statusReply("error");
+        return
+    }
     var m = JSON.parse(sData);
 
 
