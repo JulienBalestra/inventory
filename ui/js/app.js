@@ -20,6 +20,9 @@ function getXMLHttpRequest() {
 }
 
 function parseMetadata(meta) {
+    if (meta == null) {
+        return ""
+    }
     if (meta.role == "worker") {
         return meta.role + " " + meta["state"];
     } else {
@@ -92,20 +95,29 @@ function statusReply(status) {
     }
 }
 
+function compare(a, b) {
+
+    if (a.ID < b.ID)
+        return 1;
+
+    return 0;
+}
+
 function readData(sData) {
 
-    if (sData == null) {
+    try {
+        var m = JSON.parse(sData);
+    } catch (e) {
         statusReply("error");
         return
     }
-    var m = JSON.parse(sData);
-
 
     if (m == null) {
         statusReply("null");
         return
     }
     statusReply("healthy");
+    m.sort(compare);
 
     var table = document.getElementById("machines");
 

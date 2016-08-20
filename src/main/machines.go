@@ -66,8 +66,6 @@ func closer(ch chan Machine, count chan int, size int) {
 			log.Printf("%s task done", FuncNameF(closer))
 			break
 		}
-		log.Printf("%s sleep %.1fs count(%d) < size(%d)",
-			FuncNameF(closer), CONF.GoRoutineSleep.Seconds(), len(count), size)
 		time.Sleep(CONF.GoRoutineSleep)
 	}
 	log.Printf("%s closing channel used as %d/%d",
@@ -132,7 +130,7 @@ func GetMachines(full bool) []Machine {
 	if full {
 		d.fts = append(d.fts, RemoteIfaces)
 		MachineRo(d, &d.machines)
-		log.Printf("%s Full start\n\n", FuncNameF(GetMachines))
+		log.Printf("%s Full start\n", FuncNameF(GetMachines))
 		d.all_ips = GetSomeIPv4(&d.machines, IsWantedPrefix)
 		d.fts = append(d.fts, RemoteTangle)
 		d.fts = append(d.fts, RemoteHostname)

@@ -5,6 +5,7 @@ import (
 	"runtime"
 	"reflect"
 	"time"
+	"strings"
 )
 
 type Config struct {
@@ -36,7 +37,7 @@ type Urls struct {
 
 	Probe      string
 	Help       string
-	Ui       string
+	Ui         string
 }
 
 func CreateConfig() Config {
@@ -54,7 +55,7 @@ func CreateConfig() Config {
 	c.EtcdAddress = "http://127.0.0.1:2379/v2/keys"
 	c.FleetMachineUrl = "/_coreos.com/fleet/machines"
 
-	c.LogPadding = 18
+	c.LogPadding = 15
 
 	c.prefix = append(c.prefix, "192.168")
 	c.prefix = append(c.prefix, "10.1.")
@@ -98,7 +99,7 @@ func SelfRequest(target string, url string) string {
 }
 
 func FuncName(i interface{}) string {
-	return runtime.FuncForPC(reflect.ValueOf(i).Pointer()).Name()
+	return strings.Trim(runtime.FuncForPC(reflect.ValueOf(i).Pointer()).Name(), "main.")
 }
 
 func FuncNameF(i interface{}) string {
