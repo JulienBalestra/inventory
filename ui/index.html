@@ -22,15 +22,42 @@
 
             <h1>Inventory</h1>
 
-            <h3>Machines</h3>
-            <table class="table table-striped" id="machines">
-                <tr></tr>
-            </table>
+
+            <div>
+                <!-- Nav tabs -->
+                <ul class="nav nav-tabs" role="tablist">
+                    <li role="presentation" class="active">
+                        <a href="#home" aria-controls="home" role="tab" data-toggle="tab">Machines</a>
+                    </li>
+
+                    <li role="presentation">
+                        <a href="#interfaces" aria-controls="interfaces" role="tab" data-toggle="tab">Interfaces</a>
+                    </li>
+
+                    <li role="presentation">
+                        <a href="#connections" aria-controls="connections" role="tab" data-toggle="tab">Connections</a>
+                    </li>
+                </ul>
+
+                <!-- Tab panes -->
+                <div class="tab-content">
+
+                    <div role="tabpanel" class="tab-pane active" id="home">
+                        <table class="table table-striped" id="machines">
+                            <tr></tr>
+                        </table>
+                    </div>
+
+                    <div role="tabpanel" class="tab-pane" id="interfaces"></div>
+                    <div role="tabpanel" class="tab-pane" id="connections"></div>
+
+                </div>
+            </div>
         </div>
     </div>
-</div>
 
-<script src="js/app.js"></script>
+
+    <script src="js/app.js"></script>
 
 </body>
 </html>
