@@ -12,15 +12,17 @@
         '{"ID":"010","PublicIP":"127.0.0.1","Metadata":{"role":"services"},"Version":"0.11.7"}'
         
     etcdctl set /_coreos.com/fleet/machines/003/object  \
-        '{"ID":"003","PublicIP":"172.17.0.254","Metadata":{"role":"nohere"},"Version":"0.11.7"}'
+        '{"ID":"003","PublicIP":"172.18.0.254","Metadata":{"role":"nohere"},"Version":"0.11.7"}'
 
     etcdctl mkdir /_coreos.com/fleet/machines/004
     
-    for i in {1..9}
+    for i in {2..9}
     do etcdctl set /_coreos.com/fleet/machines/00${i}/object \
         "{\"ID\": \"00${i}\", \"PublicIP\": \"172.17.0.${i}\",\"Metadata\":{\"role\":\"docker\"},\"Version\":\"0.11.7\"}"
         docker run --rm -v $(pwd)/inventory:/inventory debian /inventory &
     done
+    
+    docker ps -q | xargs docker kill
 
                     
                     
