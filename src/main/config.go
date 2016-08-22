@@ -57,7 +57,7 @@ func CreateConfig() Config {
 
 	c.LogPadding = 15
 
-	c.prefix = append(c.prefix, "192.168")
+	c.prefix = append(c.prefix, "192.168.")
 	c.prefix = append(c.prefix, "10.1.")
 
 

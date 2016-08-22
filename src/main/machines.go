@@ -21,10 +21,10 @@ type Machine struct {
 }
 
 type QueryData struct {
-	machines []Machine
-	reply    EtcdReply
-	all_ips  []string
-	fts      []func(m *Machine, re QueryData)
+	tmp_machines []Machine
+	reply        EtcdReply
+	all_ips      []string
+	fts          []func(m *Machine, re QueryData)
 }
 
 func MakeMachine(d QueryData, ch chan <- Machine, node EtcdNode) {
@@ -103,6 +103,9 @@ func MachineNb(reply EtcdReply) int {
 
 func MachineRo(d QueryData, machines *[]Machine) {
 	nb_nodes := MachineNb(d.reply)
+	if nb_nodes == 0 {
+		return
+	}
 
 	ch_machines := make(chan Machine, nb_nodes)
 	for _, node := range d.reply.Node.Nodes {
@@ -129,9 +132,13 @@ func GetMachines(full bool) []Machine {
 
 	if full {
 		d.fts = append(d.fts, RemoteIfaces)
-		MachineRo(d, &d.machines)
+		MachineRo(d, &d.tmp_machines)
+		if len(d.tmp_machines) == 0 {
+			log.Printf("%s No machine\n", FuncNameF(GetMachines))
+			return machines
+		}
 		log.Printf("%s Full start\n", FuncNameF(GetMachines))
-		d.all_ips = GetSomeIPv4(&d.machines, IsWantedPrefix)
+		d.all_ips = GetSomeIPv4(&d.tmp_machines, IsWantedPrefix)
 		d.fts = append(d.fts, RemoteTangle)
 		d.fts = append(d.fts, RemoteHostname)
 	}
