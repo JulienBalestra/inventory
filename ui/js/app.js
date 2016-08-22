@@ -105,17 +105,17 @@ function statusReply(status) {
 
     var ret = document.getElementById("status");
 
-    if (status == "timeout") {
-        ret.innerHTML = "<span class=\"label label-danger\">Timeout</span>";
+    if (status == "pause") {
+        ret.innerHTML = "<span class=\"label label-danger\">Pause</span>";
 
     } else if (status == "null") {
-        ret.innerHTML = "<span class=\"label label-warning\">Empty Reply</span>";
+        ret.innerHTML = "<span class=\"label label-warning\">Waiting</span>";
 
-    } else if (status == "healthy") {
-        ret.innerHTML = "<span class=\"label label-success\">Healthy</span>";
+    } else if (status == "running") {
+        ret.innerHTML = "<span class=\"label label-success\">Running</span>";
 
     } else {
-        ret.innerHTML = "<span class=\"label label-danger\">Error</span>";
+        ret.innerHTML = "<span class=\"label label-danger\">Stop</span>";
     }
 }
 
@@ -127,7 +127,7 @@ function compare(a, b) {
     return 0;
 }
 
-function machines_tab(m) {
+function machinesTab(m) {
     var table = document.getElementById("machines_tab");
 
     while (table.rows.length > 1) {
@@ -155,6 +155,7 @@ function insertInterfacesCells(m, row, fields) {
             for (var j = 0; j < value.length; j++) {
                 ifaces += value[j].IPv4 + " /" + value[j].Netmask + "</br>";
             }
+            cell.style.width = "80%";
             cell.innerHTML = ifaces;
 
         } else {
@@ -182,7 +183,7 @@ function insertInterfacesRows(m, table) {
     }
 }
 
-function interfaces_tab(m) {
+function interfacesTab(m) {
     var table = document.getElementById("interfaces_tab");
 
     while (table.rows.length > 1) {
@@ -193,24 +194,128 @@ function interfaces_tab(m) {
     insertInterfacesRows(m, table)
 }
 
+function insertConnectionsCell(m, row, fields, max) {
+
+    var cell = null;
+    var key = null;
+    var value = null;
+
+
+    for (var i = 0; i < fields.length; i++) {
+
+        cell = row.insertCell(i);
+        key = fields[i];
+        value = m[key];
+
+        if (key == "Connections" && value) {
+            var conn = "";
+            for (var j = 0; j < value.length; j++) {
+                conn += value[j].IPv4 + getProgress(value[j].LatencyMs, max) + "<br>";
+            }
+            cell.style.width = "70%";
+            cell.innerHTML = conn;
+
+        } else {
+            cell.innerHTML = value;
+        }
+    }
+}
+
+function getProgress(current, max) {
+    var percent_current = (current * 100) / max;
+    current = (Math.round(current * 100) / 100);
+    var color = "success";
+    if (current > 100) {
+        color = "danger";
+    } else if (current > 30) {
+        color = "warning";
+    }
+    var p = '<div class="progress">' +
+        '<div class="progress-bar progress-bar-' + color + '" role="progressbar" ' +
+        'aria-valuenow="' + current +
+        '" aria-valuemin="0" aria-valuemax="100" style="min-width: 4em; width: ' + percent_current + '%;">' +
+        current + ' ms</div></div>';
+    return p
+}
+
+function sortComputeMax(m) {
+    var max = 0;
+
+    for (var i = 0; i < m.length; i++) {
+        var conns = m[i].Connections;
+        if (conns) {
+            conns.sort(function (a, b) {
+                if (a.IPv4 > b.IPv4) {
+                    return 1;
+                }
+                return 0;
+            });
+            for (var j = 0; j < conns.length; j++) {
+                if (conns[j].LatencyMs > max) {
+                    max = conns[j].LatencyMs;
+                }
+            }
+        }
+    }
+    return max
+}
+
+function insertConnectionsRows(m, table) {
+
+    var fields = ["Hostname", "PublicIP", "Connections"];
+    var row = null;
+
+    var skip = 0;
+
+    var max = sortComputeMax(m);
+
+    for (var j = 0; j < m.length; j++) {
+        if (m[j].Alive == false) {
+            skip++;
+            continue
+        }
+        row = table.insertRow(j - skip);
+        insertConnectionsCell(m[j], row, fields, max);
+    }
+
+    var index = table.insertRow(0);
+
+    for (var i = 0; i < fields.length; i++) {
+        var cell = index.insertCell(i);
+        cell.innerHTML = "<b>" + fields[i] + "</b>";
+    }
+}
+
+function connectionsTab(m) {
+    var table = document.getElementById("connections_tab");
+
+    while (table.rows.length > 1) {
+        table.deleteRow(1);
+    }
+    table.deleteRow(0);
+
+    insertConnectionsRows(m, table)
+}
+
 function readData(sData) {
 
     try {
         var m = JSON.parse(sData);
     } catch (e) {
-        statusReply("error");
+        statusReply("stop");
         return
     }
 
     if (m == null) {
-        statusReply("null");
+        statusReply("pause");
         return
     }
-    statusReply("healthy");
+    statusReply("running");
     m.sort(compare);
 
-    machines_tab(m);
-    interfaces_tab(m);
+    machinesTab(m);
+    interfacesTab(m);
+    connectionsTab(m);
 }
 
 function request() {
@@ -222,10 +327,10 @@ function request() {
             setTimeout(request, 5000);
         } else if (xhr.readyState == 1 && (xhr.status == 202 || xhr.status == 203)) {
             console.log(xhr.readyState + xhr.status);
-            statusReply("timeout");
+            statusReply("stop");
 
         } else if (xhr.status == 502) {
-            statusReply("error");
+            statusReply("stop");
         }
     };
     xhr.open("GET", "/api/v0", true);
