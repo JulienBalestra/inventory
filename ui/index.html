@@ -14,20 +14,31 @@
 </head>
 
 <body>
+<nav class="navbar navbar-default" role="navigation">
+    <div class="container">
+        <div class="nav navbar-nav navbar">
+            <a class="navbar-brand">
+                <b>Inventory</b>
+            </a>
+        </div>
+
+        <div class="nav navbar-nav navbar-right">
+            <a class="navbar-brand">
+                <div id="status"></div>
+            </a>
+
+        </div>
+    </div>
+</nav>
 <div class="container">
     <div class="row">
         <div class="col-md-12">
-
-            <div class="text-right" id="status"></div>
-
-            <h1>Inventory</h1>
-
 
             <div>
                 <!-- Nav tabs -->
                 <ul class="nav nav-tabs" role="tablist">
                     <li role="presentation" class="active">
-                        <a href="#home" aria-controls="home" role="tab" data-toggle="tab">Machines</a>
+                        <a href="#machines" aria-controls="home" role="tab" data-toggle="tab">Machines</a>
                     </li>
 
                     <li role="presentation">
@@ -42,13 +53,17 @@
                 <!-- Tab panes -->
                 <div class="tab-content">
 
-                    <div role="tabpanel" class="tab-pane active" id="home">
-                        <table class="table table-striped" id="machines">
+                    <div role="tabpanel" class="tab-pane active" id="machines">
+                        <table class="table table-striped" id="machines_tab">
                             <tr></tr>
                         </table>
                     </div>
 
-                    <div role="tabpanel" class="tab-pane" id="interfaces"></div>
+                    <div role="tabpanel" class="tab-pane" id="interfaces">
+                        <table class="table table-bordered" id="interfaces_tab">
+                            <tr></tr>
+                        </table>
+                    </div>
                     <div role="tabpanel" class="tab-pane" id="connections"></div>
 
                 </div>

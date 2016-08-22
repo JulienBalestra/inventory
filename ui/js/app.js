@@ -38,7 +38,27 @@ function aliveLabel(alive) {
     }
 }
 
-function insertCells(m, row, order) {
+function parseInterfaces(interfaces) {
+
+    if (interfaces == null) {
+        return ""
+    } else {
+        return interfaces.length
+    }
+
+}
+
+function parseConnections(conns) {
+
+    if (conns == null) {
+        return ""
+    } else {
+        return conns.length
+    }
+
+}
+
+function insertMachineCells(m, row, order) {
 
     var cell = null;
     var key = null;
@@ -53,27 +73,31 @@ function insertCells(m, row, order) {
             cell.innerHTML = parseMetadata(value);
         } else if (key == "Alive") {
             cell.innerHTML = aliveLabel(value)
+        } else if (key == "Interfaces") {
+            cell.innerHTML = parseInterfaces(value);
+        } else if (key == "Connections") {
+            cell.innerHTML = parseInterfaces(value);
         } else {
             cell.innerHTML = value;
         }
     }
 }
 
-function insertRows(m, table) {
+function insertMachinesRows(m, table) {
 
-    var order = ["Alive", "ID", "PublicIP", "Hostname", "Metadata"];
+    var fields = ["Alive", "ID", "PublicIP", "Hostname", "Interfaces", "Connections", "Metadata"];
     var row = null;
 
     for (var j = 0; j < m.length; j++) {
         row = table.insertRow(j);
-        insertCells(m[j], row, order);
+        insertMachineCells(m[j], row, fields);
     }
 
     var index = table.insertRow(0);
 
-    for (var i = 0; i < order.length; i++) {
+    for (var i = 0; i < fields.length; i++) {
         var cell = index.insertCell(i);
-        cell.innerHTML = order[i];
+        cell.innerHTML = "<b>" + fields[i] + "</b>";
     }
 }
 
@@ -97,10 +121,76 @@ function statusReply(status) {
 
 function compare(a, b) {
 
-    if (a.ID < b.ID)
+    if (a.Hostname > b.Hostname)
         return 1;
 
     return 0;
+}
+
+function machines_tab(m) {
+    var table = document.getElementById("machines_tab");
+
+    while (table.rows.length > 1) {
+        table.deleteRow(1);
+    }
+    table.deleteRow(0);
+
+    insertMachinesRows(m, table)
+}
+
+function insertInterfacesCells(m, row, fields) {
+
+    var cell = null;
+    var key = null;
+    var value = null;
+
+    for (var i = 0; i < fields.length; i++) {
+
+        cell = row.insertCell(i);
+        key = fields[i];
+        value = m[key];
+
+        if (key == "Interfaces" && value) {
+            var ifaces = "";
+            for (var j = 0; j < value.length; j++) {
+                ifaces += value[j].IPv4 + " /" + value[j].Netmask + "</br>";
+            }
+            cell.innerHTML = ifaces;
+
+        } else {
+            cell.innerHTML = value;
+        }
+    }
+}
+
+function insertInterfacesRows(m, table) {
+
+    var fields = ["Hostname", "Interfaces"];
+    var row = null;
+
+
+    for (var j = 0; j < m.length; j++) {
+        row = table.insertRow(j);
+        insertInterfacesCells(m[j], row, fields);
+    }
+
+    var index = table.insertRow(0);
+
+    for (var i = 0; i < fields.length; i++) {
+        var cell = index.insertCell(i);
+        cell.innerHTML = "<b>" + fields[i] + "</b>";
+    }
+}
+
+function interfaces_tab(m) {
+    var table = document.getElementById("interfaces_tab");
+
+    while (table.rows.length > 1) {
+        table.deleteRow(1);
+    }
+    table.deleteRow(0);
+
+    insertInterfacesRows(m, table)
 }
 
 function readData(sData) {
@@ -119,14 +209,8 @@ function readData(sData) {
     statusReply("healthy");
     m.sort(compare);
 
-    var table = document.getElementById("machines");
-
-    while (table.rows.length > 1) {
-        table.deleteRow(1);
-    }
-    table.deleteRow(0);
-
-    insertRows(m, table)
+    machines_tab(m);
+    interfaces_tab(m);
 }
 
 function request() {
