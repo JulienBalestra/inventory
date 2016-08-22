@@ -20,8 +20,8 @@ UI=ui
 default: $(TARGET)
 
 $(DEPS):
-	GOPATH=$(shell pwd) $(GET) -u github.com/jteeuwen/go-bindata/...
-	GOPATH=$(shell pwd) $(GET) -u github.com/elazarl/go-bindata-assetfs/...
+	@GOPATH=$(shell pwd) $(GET) -u github.com/jteeuwen/go-bindata/...
+	@GOPATH=$(shell pwd) $(GET) -u github.com/elazarl/go-bindata-assetfs/...
 
 js:
 	make -C $(UI)
@@ -41,7 +41,10 @@ clean:
 
 fclean: clean
 	make -C $(UI) fclean
-	rm -Rf $(DEPS) pkg
+	rm -Rf $(DEPS) $(BIN_DIR) pkg
+
+run: clean $(TARGET)
+	./$(TARGET)
 
 deploy: static
 	swift --insecure upload $(TARGET) $(TARGET)
