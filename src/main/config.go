@@ -6,6 +6,7 @@ import (
 	"reflect"
 	"time"
 	"strings"
+	"os"
 )
 
 type Config struct {
@@ -52,13 +53,19 @@ func CreateConfig() Config {
 	c.GoRoutineTimeout = time.Second * 5
 
 	// Common use of Etcd and Fleet
-	c.EtcdAddress = "http://127.0.0.1:2379/v2/keys"
+	if (os.Getenv("ETCD_ADDRESS") != "") {
+		c.EtcdAddress = os.Getenv("ETCD_ADDRESS")
+	} else {
+		c.EtcdAddress = "http://127.0.0.1:2379/v2/keys"
+	}
+
 	c.FleetMachineUrl = "/_coreos.com/fleet/machines"
 
 	c.LogPadding = 15
 
 	c.prefix = append(c.prefix, "192.168.")
 	c.prefix = append(c.prefix, "10.1.")
+	//c.prefix = append(c.prefix, "172.")
 
 
 	// Internal Application //
