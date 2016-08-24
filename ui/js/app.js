@@ -1,3 +1,5 @@
+var ALL_LATS = [];
+
 function getXMLHttpRequest() {
 
     var xhr = null;
@@ -48,15 +50,15 @@ function parseInterfaces(interfaces) {
 
 }
 
-function parseConnections(conns) {
+function getLen(conns) {
 
     if (conns == null) {
-        return ""
+        return 0
     } else {
         return conns.length
     }
-
 }
+
 
 function insertMachineCells(m, row, order) {
 
@@ -74,10 +76,26 @@ function insertMachineCells(m, row, order) {
         } else if (key == "Alive") {
             cell.innerHTML = aliveLabel(value)
         } else if (key == "Interfaces") {
-            cell.innerHTML = parseInterfaces(value);
+            cell.innerHTML = getLen(value);
         } else if (key == "Connections") {
-            cell.innerHTML = parseInterfaces(value);
-        } else {
+            var color = "warning";
+            var lat = 0;
+            if (value != null) {
+                for (var j = 0; j < value.length; j++) {
+                    lat += value[j].LatencyMs;
+                }
+                lat = Math.round((lat / value.length) * 10) / 10;
+                if (lat < 20) {
+                    color = "success";
+                } else if (lat > 50 ) {
+                    color = "danger";
+                }
+
+            }
+            cell.innerHTML = getProgress(lat, color, 20);
+
+        }
+        else {
             cell.innerHTML = value;
         }
     }
@@ -152,10 +170,13 @@ function insertInterfacesCells(m, row, fields) {
 
         if (key == "Interfaces" && value) {
             var ifaces = "";
+            var mask = "";
             for (var j = 0; j < value.length; j++) {
-                ifaces += value[j].IPv4 + " /" + value[j].Netmask + "</br>";
+                ifaces += value[j].IPv4 + "</br>";
+                mask += value[j].Netmask + "</br>";
             }
-            cell.style.width = "80%";
+            cell.innerHTML = mask;
+            cell = row.insertCell(i);
             cell.innerHTML = ifaces;
 
         } else {
@@ -176,6 +197,8 @@ function insertInterfacesRows(m, table) {
     }
 
     var index = table.insertRow(0);
+
+    fields.push("Netmask");
 
     for (var i = 0; i < fields.length; i++) {
         var cell = index.insertCell(i);
@@ -208,12 +231,27 @@ function insertConnectionsCell(m, row, fields, max) {
         value = m[key];
 
         if (key == "Connections" && value) {
-            var conn = "";
+            var connIP = "";
+            var connBar = "";
+            var color = "";
             for (var j = 0; j < value.length; j++) {
-                conn += value[j].IPv4 + getProgress(value[j].LatencyMs, max) + "<br>";
+
+                var latency = value[j].LatencyMs;
+                connIP += value[j].IPv4 + "<br>";
+                if (latency > 100) {
+                    color = "danger";
+                } else if (latency > 20) {
+                    color = "warning";
+                } else {
+                    color = "success";
+                }
+                connBar += getProgress(latency, color, max);
             }
             cell.style.width = "70%";
-            cell.innerHTML = conn;
+            cell.innerHTML = connBar;
+
+            cell = row.insertCell(i);
+            cell.innerHTML = connIP;
 
         } else {
             cell.innerHTML = value;
@@ -221,25 +259,22 @@ function insertConnectionsCell(m, row, fields, max) {
     }
 }
 
-function getProgress(current, max) {
+function getProgress(current, color, max) {
     var percent_current = (current * 100) / max;
     current = (Math.round(current * 100) / 100);
-    var color = "success";
-    if (current > 100) {
-        color = "danger";
-    } else if (current > 30) {
-        color = "warning";
-    }
+
     var p = '<div class="progress">' +
         '<div class="progress-bar progress-bar-' + color + '" role="progressbar" ' +
         'aria-valuenow="' + current +
-        '" aria-valuemin="0" aria-valuemax="100" style="min-width: 4em; width: ' + percent_current + '%;">' +
-        current + ' ms</div></div>';
+        '" aria-valuemin="0" aria-valuemax="100" style="min-width: 2.5em; width: ' + percent_current + '%;">' +
+        current + '</div></div>';
     return p
 }
 
-function sortComputeMax(m) {
+function sortComputeLatencies(m) {
     var max = 0;
+    var moy = 0;
+    var latencies = 0;
 
     for (var i = 0; i < m.length; i++) {
         var conns = m[i].Connections;
@@ -251,23 +286,24 @@ function sortComputeMax(m) {
                 return 0;
             });
             for (var j = 0; j < conns.length; j++) {
+                moy += conns[j].LatencyMs;
+                latencies++;
                 if (conns[j].LatencyMs > max) {
                     max = conns[j].LatencyMs;
                 }
             }
         }
     }
-    return max
+    moy = moy / latencies;
+    return {"moy": moy, "max": max}
 }
 
-function insertConnectionsRows(m, table) {
+function insertConnectionsRows(m, max, table) {
 
     var fields = ["Hostname", "PublicIP", "Connections"];
     var row = null;
 
     var skip = 0;
-
-    var max = sortComputeMax(m);
 
     for (var j = 0; j < m.length; j++) {
         if (m[j].Alive == false) {
@@ -279,6 +315,7 @@ function insertConnectionsRows(m, table) {
     }
 
     var index = table.insertRow(0);
+    fields.push("LatencyMs");
 
     for (var i = 0; i < fields.length; i++) {
         var cell = index.insertCell(i);
@@ -286,7 +323,70 @@ function insertConnectionsRows(m, table) {
     }
 }
 
+
+function latencyGraph() {
+
+    var pts = "";
+    var x = "";
+    var y = "";
+
+    while (ALL_LATS.length > 35) {
+        ALL_LATS.shift()
+    }
+
+    var maxi = 0;
+    var mini = 0;
+
+    for (var i = 0; i < ALL_LATS.length; i++) {
+        if (ALL_LATS[i].moy > maxi) {
+            maxi = ALL_LATS[i].moy;
+        }
+
+        if (ALL_LATS[i].moy < mini) {
+            mini = ALL_LATS[i].moy;
+        }
+    }
+
+    maxi = Math.round(maxi * 1.20);
+    mini = Math.round(mini * 0.80);
+
+    if (mini < 0) {
+        mini = 0;
+    }
+
+    if (mini == 0 && maxi == 0) {
+        return
+    }
+
+    var padding = 500 / (maxi - mini);
+    var ladder = "";
+
+    while (mini < maxi) {
+        ladder += '<text x="50" y="' + (500 - (mini * padding)) + '">' + mini + '</text>';
+        mini++;
+    }
+    var nb = 0;
+    for (i = 0; i < ALL_LATS.length; i++) {
+        x = (nb * 20) + 80;
+        y = 500 - (ALL_LATS[i].moy * padding);
+        pts += '<circle cx="' + x + '" cy="' + y + '" data-value="' + ALL_LATS[i].moy + '" r="4"></circle>';
+        nb++;
+    }
+
+    var data = document.getElementById("latency-data");
+    var labels = document.getElementById("latency-labels");
+
+    data.innerHTML = pts;
+    labels.innerHTML = ladder;
+}
+
 function connectionsTab(m) {
+    var lats = sortComputeLatencies(m);
+
+    ALL_LATS.push(lats);
+
+    latencyGraph();
+
     var table = document.getElementById("connections_tab");
 
     while (table.rows.length > 1) {
@@ -294,7 +394,7 @@ function connectionsTab(m) {
     }
     table.deleteRow(0);
 
-    insertConnectionsRows(m, table)
+    insertConnectionsRows(m, lats.max, table)
 }
 
 function readData(sData) {
@@ -302,12 +402,14 @@ function readData(sData) {
     try {
         var m = JSON.parse(sData);
     } catch (e) {
+        console.log(e);
         statusReply("stop");
         return
     }
 
     if (m == null) {
-        statusReply("pause");
+        console.log("empty reply");
+        statusReply("stop");
         return
     }
     statusReply("running");

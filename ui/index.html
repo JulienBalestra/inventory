@@ -10,6 +10,8 @@
     <link rel="stylesheet" href="node_modules/bootstrap/dist/css/bootstrap-theme.min.css">
     <link rel="stylesheet" href="css/index.css">
 
+    <script src="js/app.js"></script>
+
     <title>Inventory</title>
 </head>
 
@@ -65,6 +67,21 @@
                         </table>
                     </div>
                     <div role="tabpanel" class="tab-pane" id="connections">
+
+                        <svg version="1.2" xmlns="http://www.w3.org/2000/svg" class="graph" aria-labelledby="title"
+                             role="img">
+                            <g class="grid x-grid" id="xGrid">
+                                <line x1="60" x2="60" y1="5" y2="500"></line>
+                            </g>
+                            <g class="grid y-grid" id="yGrid">
+                                <line x1="60" x2="800" y1="500" y2="500"></line>
+                            </g>
+                            <g class="labels y-labels" id="latency-labels">
+                            </g>
+                            <g class="data" data-setname="Latency" id="latency-data">
+                            </g>
+                        </svg>
+
                         <table class="table table-bordered" id="connections_tab">
                             <tr></tr>
                         </table>
@@ -75,9 +92,5 @@
         </div>
     </div>
 </div>
-
-
-<script src="js/app.js"></script>
-
 </body>
 </html>

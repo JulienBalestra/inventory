@@ -1,3 +1,48 @@
 h1 {
     text-align: center;
 }
+
+div.progress {
+    border-radius: 0;
+    margin-top: 4px;
+    box-shadow: 0 0 1px #a8a8a8;
+    margin-bottom: 3px;
+    height: 16px;
+}
+
+
+.graph .labels.x-labels {
+    text-anchor: middle;
+}
+
+.graph .labels.y-labels {
+    text-anchor: end;
+}
+
+
+.graph {
+    height: 500px;
+    width: 800px;
+}
+
+.graph .grid {
+    stroke: #ccc;
+    stroke-dasharray: 0;
+    stroke-width: 1;
+}
+
+.labels {
+    font-size: 13px;
+}
+
+.label-title {
+    font-weight: bold;
+    text-transform: uppercase;
+    font-size: 12px;
+    fill: black;
+}
+
+.data {
+    fill: #2e446e;
+    stroke-width: 1;
+}
