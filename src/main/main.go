@@ -96,5 +96,7 @@ func main() {
 	http.HandleFunc(CONF.Urls.Hostname, HHostname)
 	http.HandleFunc(CONF.Urls.Probe, HProbe)
 	http.HandleFunc(CONF.Urls.Tangle, HTangle)
-	http.ListenAndServe(CONF.Bind + ":" + CONF.Port, nil)
+	err := http.ListenAndServe(CONF.Bind + ":" + CONF.Port, nil)
+
+	log.Println("Close program", err)
 }
