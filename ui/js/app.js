@@ -230,7 +230,7 @@ function insertConnectionsCell(oneMachine, row, mLats, cLats) {
     cell.innerHTML = oneMachine.PublicIP;
 
     cell = row.insertCell(i);
-    cell.style.width = "80%";
+    cell.style.width = "60%";
     cell.innerHTML = createCollapseLatency(oneMachine, mLats, cLats);
 
 }
