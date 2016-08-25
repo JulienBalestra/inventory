@@ -46,3 +46,7 @@ div.progress {
     fill: #2e446e;
     stroke-width: 1;
 }
+
+.panel {
+    margin-bottom: 0px;
+}

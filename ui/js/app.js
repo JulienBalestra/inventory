@@ -1,5 +1,5 @@
 var ALL_LATS = [];
-var POLLING = 1000;
+var POLLING = 10000;
 
 function getXMLHttpRequest() {
 
@@ -93,7 +93,7 @@ function insertMachineCells(m, row, order) {
                 }
 
             }
-            cell.innerHTML = getProgress(lat, color, 20);
+            cell.innerHTML = createProgressBar(lat, color, 20);
 
         }
         else {
@@ -218,58 +218,21 @@ function interfacesTab(m) {
     insertInterfacesRows(m, table)
 }
 
-function insertConnectionsCell(m, row, fields, max) {
+function insertConnectionsCell(oneMachine, row, mLats, cLats) {
 
-    var cell = null;
-    var key = null;
-    var value = null;
+    var i = 0;
+    var cell;
 
+    cell = row.insertCell(i++);
+    cell.innerHTML = oneMachine.Hostname;
 
-    for (var i = 0; i < fields.length; i++) {
+    cell = row.insertCell(i++);
+    cell.innerHTML = oneMachine.PublicIP;
 
-        cell = row.insertCell(i);
-        key = fields[i];
-        value = m[key];
+    cell = row.insertCell(i);
+    cell.style.width = "80%";
+    cell.innerHTML = createCollapseLatency(oneMachine, mLats, cLats);
 
-        if (key == "Connections" && value) {
-            var connIP = "";
-            var connBar = "";
-            var color = "";
-            for (var j = 0; j < value.length; j++) {
-
-                var latency = value[j].LatencyMs;
-                connIP += value[j].IPv4 + "<br>";
-                if (latency > 100) {
-                    color = "danger";
-                } else if (latency > 20) {
-                    color = "warning";
-                } else {
-                    color = "success";
-                }
-                connBar += getProgress(latency, color, max);
-            }
-            cell.style.width = "70%";
-            cell.innerHTML = connBar;
-
-            cell = row.insertCell(i);
-            cell.innerHTML = connIP;
-
-        } else {
-            cell.innerHTML = value;
-        }
-    }
-}
-
-function getProgress(current, color, max) {
-    var percent_current = (current * 100) / max;
-    current = (Math.round(current * 100) / 100);
-
-    var p = '<div class="progress">' +
-        '<div class="progress-bar progress-bar-' + color + '" role="progressbar" ' +
-        'aria-valuenow="' + current +
-        '" aria-valuemin="0" aria-valuemax="100" style="min-width: 2.5em; width: ' + percent_current + '%;">' +
-        current + '</div></div>';
-    return p
 }
 
 function sortComputeLatencies(m) {
@@ -299,7 +262,7 @@ function sortComputeLatencies(m) {
     return {"moy": moy, "max": max}
 }
 
-function insertConnectionsRows(m, max, table) {
+function insertConnectionsRows(m, mLats, table) {
 
     var fields = ["Hostname", "PublicIP", "Connections"];
     var row = null;
@@ -312,11 +275,11 @@ function insertConnectionsRows(m, max, table) {
             continue
         }
         row = table.insertRow(j - skip);
-        insertConnectionsCell(m[j], row, fields, max);
+        var cLats = computeConnectionsLatencies(m[j].Connections);
+        insertConnectionsCell(m[j], row, mLats, cLats);
     }
 
     var index = table.insertRow(0);
-    fields.push("LatencyMs");
 
     for (var i = 0; i < fields.length; i++) {
         var cell = index.insertCell(i);
@@ -372,7 +335,7 @@ function latencyGraph() {
         y = 500 - (ALL_LATS[i].moy * padding);
         pts += '<circle cx="' + x + '" cy="' + y + '" data-value="' + ALL_LATS[i].moy + '" r="4"></circle>';
         if (i % 5 == 1) {
-            ladder += '<text x="' + (x) + '" y="520">' + Math.round(ALL_LATS.length - (i * (POLLING / 1000))) + '</text>';
+            // ladder += '<text x="' + (x) + '" y="520">' + Math.round(ALL_LATS.length - (i * (POLLING / 1000))) + '</text>';
         }
         nb++;
     }
@@ -398,7 +361,8 @@ function connectionsTab(m) {
     }
     table.deleteRow(0);
 
-    insertConnectionsRows(m, lats.max, table)
+    lats = computeMachinesLatencies(m);
+    insertConnectionsRows(m, lats, table)
 }
 
 function readData(sData) {
