@@ -1,4 +1,5 @@
 var ALL_LATS = [];
+var POLLING = 1000;
 
 function getXMLHttpRequest() {
 
@@ -87,7 +88,7 @@ function insertMachineCells(m, row, order) {
                 lat = Math.round((lat / value.length) * 10) / 10;
                 if (lat < 20) {
                     color = "success";
-                } else if (lat > 50 ) {
+                } else if (lat > 50) {
                     color = "danger";
                 }
 
@@ -330,7 +331,7 @@ function latencyGraph() {
     var x = "";
     var y = "";
 
-    while (ALL_LATS.length > 35) {
+    while (ALL_LATS.length > 36) {
         ALL_LATS.shift()
     }
 
@@ -370,6 +371,9 @@ function latencyGraph() {
         x = (nb * 20) + 80;
         y = 500 - (ALL_LATS[i].moy * padding);
         pts += '<circle cx="' + x + '" cy="' + y + '" data-value="' + ALL_LATS[i].moy + '" r="4"></circle>';
+        if (i % 5 == 1) {
+            ladder += '<text x="' + (x) + '" y="520">' + Math.round(ALL_LATS.length - (i * (POLLING / 1000))) + '</text>';
+        }
         nb++;
     }
 
@@ -426,7 +430,7 @@ function request() {
     xhr.onreadystatechange = function () {
         if (xhr.readyState == 4 && (xhr.status == 200 || xhr.status == 0)) {
             readData(xhr.responseText);
-            setTimeout(request, 5000);
+            setTimeout(request, POLLING);
         } else if (xhr.readyState == 1 && (xhr.status == 202 || xhr.status == 203)) {
             console.log(xhr.readyState + xhr.status);
             statusReply("stop");
