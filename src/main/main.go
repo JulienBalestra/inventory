@@ -70,12 +70,12 @@ func HHostname(w http.ResponseWriter, r *http.Request) {
 
 func HTangle(w http.ResponseWriter, r *http.Request) {
 	if (r.Method == "POST") {
-		log.Printf("%s POST %s", FuncNameF(HTangle), CONF.Urls.Tangle)
+		log.Printf("%s POST %s", FuncNameF(HTangle), CONF.Urls.Network)
 		if r.ContentLength > 0 {
-			t := TangleRo(r)
+			t := NetRo(r)
 			w.Write(t)
 		} else {
-			log.Printf("%s POST %s EMPTY", FuncNameF(HTangle), CONF.Urls.Tangle)
+			log.Printf("%s POST %s EMPTY", FuncNameF(HTangle), CONF.Urls.Network)
 		}
 	}
 }
@@ -104,7 +104,7 @@ func main() {
 	http.HandleFunc(CONF.Urls.Interfaces, HInterfaces)
 	http.HandleFunc(CONF.Urls.Hostname, HHostname)
 	http.HandleFunc(CONF.Urls.Probe, HProbe)
-	http.HandleFunc(CONF.Urls.Tangle, HTangle)
+	http.HandleFunc(CONF.Urls.Network, HTangle)
 	err := http.ListenAndServe(CONF.Bind + ":" + CONF.Port, nil)
 
 	log.Println("Close program", err)

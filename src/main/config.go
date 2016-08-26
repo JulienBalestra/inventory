@@ -34,7 +34,8 @@ type Urls struct {
 	Machines   string
 	Interfaces string
 	Hostname   string
-	Tangle     string
+	Network    string
+	Units    string
 
 	Probe      string
 	Help       string
@@ -65,7 +66,7 @@ func CreateConfig() Config {
 
 	c.prefix = append(c.prefix, "192.168.")
 	c.prefix = append(c.prefix, "10.1.")
-	//c.prefix = append(c.prefix, "172.")
+	c.prefix = append(c.prefix, "172.")
 
 
 	// Internal Application //
@@ -88,7 +89,7 @@ func CreateConfig() Config {
 	c.Urls.Hostname = c.Urls.Root + "/hostname"
 
 	// /api/v0/tangle
-	c.Urls.Tangle = c.Urls.Root + "/tangle"
+	c.Urls.Network = c.Urls.Root + "/network"
 
 
 	// /help

@@ -9,12 +9,13 @@ import (
 
 	"bytes"
 	"io/ioutil"
+	"math"
 )
 
 type ConnectStatus struct {
 	IPv4      string
 	Reach     bool
-	LatencyMs float32
+	LatencyMs float64
 }
 
 func GetSomeIPv4(machines *[]Machine, iswanted func(ip string) bool) []string {
@@ -48,7 +49,7 @@ func GetPostData(r *http.Request) []string {
 	n, err := r.Body.Read(p)
 	if n == 0 {
 		log.Printf("%s ContentLen(%d) Read(%d)",
-			FuncNameF(TangleRo), r.ContentLength, n)
+			FuncNameF(NetRo), r.ContentLength, n)
 	} else if int64(n) != r.ContentLength && err != nil {
 		log.Println(FuncNameF(HTangle), "ERROR", err)
 		return given_ips
@@ -62,28 +63,28 @@ func GetPostData(r *http.Request) []string {
 	return given_ips
 }
 
-func TimeNowMillisecond() float32 {
-	return float32(time.Now().Nanosecond()) / 1000000
+func TimeNowMillisecond() float64 {
+	return float64(time.Now().Nanosecond()) / 1000000
 }
 
-func MakeTangle(ch chan ConnectStatus, ip string) {
+func MakeNet(ch chan ConnectStatus, ip string) {
 	var conn ConnectStatus
 	var reach bool
 
-	log.Printf("%s starting", FuncNameF(MakeTangle))
+	log.Printf("%s starting", FuncNameF(MakeNet))
 
 	conn.IPv4 = ip
 	start := TimeNowMillisecond()
 	reach = IsAlive(ip)
 	if reach {
 		conn.Reach = true
-		conn.LatencyMs = TimeNowMillisecond() - start
+		conn.LatencyMs = math.Abs(TimeNowMillisecond() - start) // abs: sometimes get - 0.00999
 	}
 	ch <- conn
-	log.Printf("%s finished", FuncNameF(MakeTangle))
+	log.Printf("%s finished", FuncNameF(MakeNet))
 }
 
-func TangleRo(r *http.Request) []byte {
+func NetRo(r *http.Request) []byte {
 
 	var ips []string
 	var skip bool
@@ -92,7 +93,7 @@ func TangleRo(r *http.Request) []byte {
 		skip = false
 		for _, local := range LocalIfaces() {
 			if ip == local.IPv4 {
-				log.Printf("%s skip local %s", FuncNameF(TangleRo), ip)
+				log.Printf("%s skip local %s", FuncNameF(NetRo), ip)
 				skip = true
 				break
 			}
@@ -101,16 +102,16 @@ func TangleRo(r *http.Request) []byte {
 			ips = append(ips, ip)
 		}
 	}
-	log.Printf("%s to query IP[%d]", FuncNameF(TangleRo), len(ips))
+	log.Printf("%s to query IP[%d]", FuncNameF(NetRo), len(ips))
 
 	ch := make(chan ConnectStatus, len(ips))
 	for i, ip := range ips {
-		log.Printf("%s starting %d/%d", FuncNameF(TangleRo), i + 1, len(ips))
-		go MakeTangle(ch, ip)
+		log.Printf("%s starting %d/%d", FuncNameF(NetRo), i + 1, len(ips))
+		go MakeNet(ch, ip)
 	}
 	var conns []ConnectStatus
 	for i := range ips {
-		log.Printf("%s waiting %d/%d", FuncNameF(TangleRo), i + 1, len(ips))
+		log.Printf("%s waiting %d/%d", FuncNameF(NetRo), i + 1, len(ips))
 		conns = append(conns, <-ch)
 	}
 	close(ch)
@@ -119,15 +120,15 @@ func TangleRo(r *http.Request) []byte {
 	return ret
 }
 
-func RemoteTangle(m *Machine, d QueryData) {
+func RemoteNet(m *Machine, d QueryData) {
 
 	serial_ips, err := json.Marshal(d.all_ips)
 	if err != nil {
 		log.Println("ERROR", err)
 	}
-	uri := SelfRequest(m.PublicIP, CONF.Urls.Tangle)
+	uri := SelfRequest(m.PublicIP, CONF.Urls.Network)
 
-	log.Printf("%s POST %s IP[%d] %s", FuncNameF(RemoteTangle), uri, len(d.all_ips), serial_ips)
+	log.Printf("%s POST %s IP[%d] %s", FuncNameF(RemoteNet), uri, len(d.all_ips), serial_ips)
 	req, err := http.NewRequest("POST", uri, bytes.NewBuffer(serial_ips))
 	if err != nil {
 		log.Println("ERROR", err)
