@@ -4,6 +4,9 @@ function computeMachinesLatencies(machines) {
 
     for (var i = 0; i < machines.length; i++) {
         var conns = machines[i].Connections;
+        if (!conns) {
+           continue
+        }
         for (var j = 0; j < conns.length; j++) {
             var latency = conns[j].LatencyMs;
             if (latency > maxLatency) {
