@@ -5,6 +5,8 @@ import (
 	"log"
 	"encoding/json"
 	"os"
+	"os/signal"
+	"syscall"
 )
 
 var CONF = CreateConfig()
@@ -79,6 +81,13 @@ func HTangle(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+	go func() {
+		<- c
+		log.Println("SIGTERM catch")
+		os.Exit(0)
+	}()
 	b, _ := json.Marshal(CONF)
 	http.DefaultClient.Timeout = CONF.HttpClientTimeout
 	log.Printf("%s", string(b))
