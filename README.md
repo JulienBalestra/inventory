@@ -6,8 +6,10 @@ Small project to Learn Golang and JavaScript
 ## Purpose
 
 Over a CoreOS cluster with Fleet, obtain an overview of the cluster topology.
+
 Therefore you can obtain a network topology for physical networks between hosts and inside the Flannel overlay.
-Easily visualize is the control plane match the current deployment. 
+
+Easily visualize if the control plane match the current deployment on each host of the cluster.
 
 ## Overviews
 
